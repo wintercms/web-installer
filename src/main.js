@@ -1,10 +1,14 @@
 import Vue from 'vue';
-import App from './App.vue';
+import Installer from './Installer.vue';
 import store from './store';
+import AssetDirective from './directives/asset';
 
 Vue.config.productionTip = false;
 
+// Add global directives
+Vue.directive('asset', AssetDirective);
+
 new Vue({
   store,
-  render: (h) => h(App),
+  render: (h) => h(Installer),
 }).$mount('#app');
