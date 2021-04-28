@@ -1,10 +1,7 @@
 <template>
   <div class="step">
     <div class="step-content">
-      <h4>We're now running a couple of checks.</h4>
 
-      <p>To ensure that Winter CMS will install and run on your web server, we're just doing
-        a couple of checks of your PHP and server configuration.</p>
     </div>
     <div class="step-actions">
       <Click
@@ -21,7 +18,7 @@ import StepMixin from '@/mixins/step';
 import Click from '@/components/Click.vue';
 
 export default {
-  name: 'Checks',
+  name: 'SiteDetails',
   mixins: [
     StepMixin,
   ],
@@ -30,18 +27,18 @@ export default {
   },
   data() {
     return {
-      stepId: 'checks',
-      stepName: 'System Checks',
+      stepId: 'site',
+      stepName: 'Site Details',
     };
   },
   methods: {
     complete() {
       this.$store.dispatch('steps/setStatus', {
-        id: 'checks',
+        id: 'site',
         status: 'complete',
       });
       this.$store.dispatch('steps/goTo', {
-        id: 'license',
+        id: 'database',
       });
     },
   },

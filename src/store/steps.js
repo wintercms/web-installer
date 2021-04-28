@@ -11,7 +11,7 @@ export default {
       state.steps.splice(data.key, 1);
     },
     changeStatus(state, data) {
-      state.steps[data.key] = data.status;
+      state.steps[data.key].status = data.status;
     },
     setActive(state, data) {
       state.steps.forEach((step) => {
@@ -23,14 +23,33 @@ export default {
   },
   getters: {
     getStepById: (state) => (id) => state.steps.findIndex((step) => step.id === id),
-    isActive: (state) => (id) => state.steps.find((step) => step.id === id).active,
+    isLocked: (state) => (id) => {
+      if (state.steps.length === 0) {
+        return false;
+      }
+      if (!state.steps.find((step) => step.id === id)) {
+        return false;
+      }
+
+      return (state.steps.find((step) => step.id === id).status === 'locked');
+    },
+    isActive: (state) => (id) => {
+      if (state.steps.length === 0) {
+        return false;
+      }
+      if (!state.steps.find((step) => step.id === id)) {
+        return false;
+      }
+
+      return state.steps.find((step) => step.id === id).active;
+    },
   },
   actions: {
     add({ commit }, data) {
       commit('add', {
         id: data.id,
         name: data.name,
-        status: 'pending',
+        status: 'locked',
         active: false,
       });
     },
@@ -48,10 +67,24 @@ export default {
     },
     goTo({ getters, commit }, data) {
       if (data.key) {
+        if (getters.isLocked(data.key)) {
+          commit('changeStatus', {
+            key: data.key,
+            status: 'pending',
+          });
+        }
+
         commit('setActive', {
           key: data.key,
         });
         return;
+      }
+
+      if (getters.isLocked(data.id)) {
+        commit('changeStatus', {
+          key: getters.getStepById(data.id),
+          status: 'pending',
+        });
       }
 
       commit('setActive', {

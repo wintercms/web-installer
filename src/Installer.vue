@@ -4,9 +4,12 @@
       <Sidebar />
 
       <div class="content">
-        <transition-group name="fade" mode="out-in">
-          <Introduction :key="1" />
-          <Checks :key="2" />
+        <transition-group name="fade">
+          <Introduction v-show="isStepActive('intro')" :key="'intro'" />
+          <Checks v-show="isStepActive('checks')" :key="'checks'" />
+          <License v-show="isStepActive('license')" :key="'license'" />
+          <SiteDetails v-show="isStepActive('site')" :key="'site'" />
+          <Database v-show="isStepActive('database')" :key="'database'" />
         </transition-group>
       </div>
     </div>
@@ -17,6 +20,9 @@
 import Sidebar from '@/components/Sidebar.vue';
 import Introduction from '@/components/steps/Introduction.vue';
 import Checks from '@/components/steps/Checks.vue';
+import License from '@/components/steps/License.vue';
+import SiteDetails from '@/components/steps/SiteDetails.vue';
+import Database from '@/components/steps/Database.vue';
 
 export default {
   name: 'Installer',
@@ -24,11 +30,19 @@ export default {
     Sidebar,
     Introduction,
     Checks,
+    License,
+    SiteDetails,
+    Database,
   },
   mounted() {
     this.$store.dispatch('steps/goTo', {
       id: 'intro',
     });
+  },
+  methods: {
+    isStepActive(id) {
+      return this.$store.getters['steps/isActive'](id);
+    },
   },
 };
 </script>
@@ -65,6 +79,12 @@ body {
     background: $body-bg;
     border-radius: $border-radius;
     box-shadow: 0px 12px 6px rgba(0, 0, 0, 0.18);
+
+    .content {
+      position: relative;
+      height: 100%;
+      width: 100%;
+    }
   }
 }
 </style>

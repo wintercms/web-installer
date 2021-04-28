@@ -6,10 +6,14 @@
 @import "~spectre.css/src/base";
 
 // Elements
-@import "~spectre.css/src/typography";
+@import "typography";
 @import "~spectre.css/src/forms";
 @import "~spectre.css/src/labels";
 @import "~spectre.css/src/codes";
 
 // Layout
 @import "~spectre.css/src/layout";
+@import "steps";
+
+// Utilities
+@import "transitions";

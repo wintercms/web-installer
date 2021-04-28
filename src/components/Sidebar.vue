@@ -3,13 +3,14 @@
     <div class="logo">
       <img v-asset="'install/assets/img/sidebar-logo.png'" alt="Winter CMS">
     </div>
-    <div class="steps">
+    <div class="step-links">
       <a
         href="#"
         :class="stepClasses(step)"
         v-for="(step, i) in steps"
         :key="i"
         v-text="step.name"
+        @click.prevent="onClick(step)"
       ></a>
     </div>
   </div>
@@ -25,7 +26,7 @@ export default {
   }),
   methods: {
     stepClasses(step) {
-      const classes = ['step'];
+      const classes = ['step-link'];
 
       if (step.active) {
         classes.push('active');
@@ -41,6 +42,15 @@ export default {
       }
 
       return classes.join(' ');
+    },
+    onClick(step) {
+      if (this.$store.getters['steps/isLocked'](step.id) || this.$store.getters['steps/isActive'](step.id)) {
+        return;
+      }
+
+      this.$store.dispatch('steps/goTo', {
+        id: step.id,
+      });
     },
   },
 };
@@ -61,9 +71,10 @@ export default {
     padding: $layout-spacing 20px;
   }
 
-  .steps {
-    .step {
+  .step-links {
+    .step-link {
       display: block;
+      position: relative;
       padding: $layout-spacing-sm 20px;
 
       font-family: $heading-font-family;
@@ -78,6 +89,28 @@ export default {
         background: $body-bg;
         box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.08);
         font-weight: 800;
+      }
+
+      &.complete {
+        color: $success-color;
+
+        &::after {
+          content: '✔';
+          position: absolute;
+          top: 50%;
+          right: $layout-spacing-sm;
+          width: 24px;
+          height: 24px;
+          margin-top: -12px;
+
+          background: $success-color;
+          border-radius: 50%;
+          color: $light-color;
+          text-align: center;
+          line-height: 24px;
+          font-weight: 700;
+          font-size: $font-size-lg;
+        }
       }
 
       &.locked {
