@@ -75,6 +75,9 @@ export default {
     buttonClasses() {
       const classes = [`btn-${this.size}`, `btn-${this.flag}`];
 
+      if (this.disabled) {
+        classes.push('btn-disabled');
+      }
       if (this.block) {
         classes.push('btn-block');
       }
