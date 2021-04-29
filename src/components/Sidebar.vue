@@ -83,6 +83,10 @@ export default {
       text-decoration: none;
       opacity: 1;
 
+      &.locked {
+        opacity: 0.5;
+      }
+
       &.active {
         margin-right: -1px;
 
@@ -110,6 +114,10 @@ export default {
           line-height: 24px;
           font-weight: 700;
           font-size: $font-size-lg;
+        }
+
+        &.active.complete::after {
+          margin-right: 1px;
         }
       }
 
