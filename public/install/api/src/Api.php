@@ -51,21 +51,44 @@ class Api
 
     public function getCheckPhpVersion()
     {
-      $hasVersion = version_compare(trim(strtolower(PHP_VERSION)), self::MIN_PHP_VERSION, '>=');
+        $hasVersion = version_compare(trim(strtolower(PHP_VERSION)), self::MIN_PHP_VERSION, '>=');
 
-      $this->data = [
-        'detected' => PHP_VERSION,
-        'needed' => self::MIN_PHP_VERSION,
-      ];
+        $this->data = [
+            'detected' => PHP_VERSION,
+            'needed' => self::MIN_PHP_VERSION,
+        ];
 
-      if (!$hasVersion) {
-        $this->error('PHP version requirement not met.');
-      }
+        if (!$hasVersion) {
+            $this->error('PHP version requirement not met.');
+        }
     }
 
     public function getCheckPhpExtensions()
     {
+        if (!function_exists('curl_init') || !defined('CURLOPT_FOLLOWLOCATION')) {
+            $this->data['extension'] = 'curl';
+            $this->error('Missing extension');
+        }
+        if (!function_exists('json_decode')) {
+            $this->data['extension'] = 'json';
+            $this->error('Missing extension');
+        }
+        if (!defined('PDO::ATTR_DRIVER_NAME')) {
+            $this->data['extension'] = 'pdo';
+            $this->error('Missing extension');
+        }
+        if (!class_exists('ZipArchive')) {
+            $this->data['extension'] = 'zip';
+            $this->error('Missing extension');
+        }
 
+        $extensions = ['mbstring', 'fileinfo', 'openssl', 'gd', 'filter', 'hash'];
+        foreach ($extensions as $ext) {
+            if (!extension_loaded($ext)) {
+                $this->data['extension'] = $ext;
+                $this->error('Missing extension');
+            }
+        }
     }
 
     protected function parseRequest()
