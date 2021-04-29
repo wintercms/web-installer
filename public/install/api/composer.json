@@ -1,0 +1,16 @@
+{
+    "name": "wintercms/web-installer",
+    "description": "Web-based installer for Winter CMS",
+    "type": "project",
+    "require": {
+        "illuminate/database": "^6.20.23"
+    },
+    "autoload": {
+        "psr-4": {
+            "Winter\\Installer\\": "src"
+        }
+    },
+    "license": "MIT",
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
