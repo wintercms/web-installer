@@ -73,7 +73,7 @@ export default {
     margin-bottom: $layout-spacing;
 
     border-radius: 50%;
-    background-image: url('/install/assets/img/circle-logo.png');
+    background-image: url('../../assets/img/circle-logo.png');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;

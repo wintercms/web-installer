@@ -1,7 +1,7 @@
 <template>
   <div id="sidebar">
     <div class="logo">
-      <img v-asset="'install/assets/img/sidebar-logo.png'" alt="Winter CMS">
+      <img src="../assets/img/sidebar-logo.png" alt="Winter CMS">
     </div>
     <div class="step-links">
       <a
