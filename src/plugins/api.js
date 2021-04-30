@@ -15,8 +15,8 @@ export default {
       // Allow for API URL override
       let fullUrl = 'api.php';
 
-      if (process.env.VUE_APP_API_URL) {
-        const baseUrl = process.env.VUE_APP_API_URL;
+      if (process.env.VUE_APP_INSTALL_URL) {
+        const baseUrl = process.env.VUE_APP_INSTALL_URL;
 
         if (fullUrl.substr(-1, 1) !== '/') {
           fullUrl = `${baseUrl}/${fullUrl}`;
