@@ -138,6 +138,10 @@ export default {
         },
         () => {
           this.completedChecks = true;
+          Object.keys(this.checks).forEach((key) => {
+            this.checks[key].status = false;
+            this.checks[key].description = 'An error occurred querying the installer\'s PHP API. We cannot complete this check. Please double-check that your server has PHP installed and is web-accessible.';
+          });
         },
       );
     },
