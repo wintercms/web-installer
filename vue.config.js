@@ -17,9 +17,6 @@ module.exports = {
       },
     },
   },
-  chainWebpack: (config) => {
-    config.plugins.delete('prefetch');
-  },
   assetsDir: 'install/assets',
   indexPath: 'install.html',
   lintOnSave: false,
