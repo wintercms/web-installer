@@ -41,6 +41,13 @@ To install all necessary dependencies, run the following:
 npm install
 ```
 
+You will also need to install the PHP dependencies located in the `public/install/api` directory. Run the following from the root directory to do so:
+
+```
+composer --working-dir=./public/install/api install
+```
+
+
 ### Development server (hot-reloading)
 
 The included dependencies include a simple web-server which performs hot-reloading of the app when changes are made. To start this server, run the following:
