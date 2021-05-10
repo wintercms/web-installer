@@ -8,8 +8,7 @@
           <Introduction v-show="isStepActive('intro')" :key="'intro'" />
           <Checks v-show="isStepActive('checks')" :key="'checks'" />
           <License v-show="isStepActive('license')" :key="'license'" />
-          <SiteDetails v-show="isStepActive('site')" :key="'site'" />
-          <Database v-show="isStepActive('database')" :key="'database'" />
+          <Configuration v-show="isStepActive('config')" :key="'config'" />
         </transition-group>
       </div>
     </div>
@@ -21,8 +20,7 @@ import Sidebar from '@/components/Sidebar.vue';
 import Introduction from '@/components/steps/Introduction.vue';
 import Checks from '@/components/steps/Checks.vue';
 import License from '@/components/steps/License.vue';
-import SiteDetails from '@/components/steps/SiteDetails.vue';
-import Database from '@/components/steps/Database.vue';
+import Configuration from '@/components/steps/Configuration.vue';
 
 export default {
   name: 'Installer',
@@ -31,8 +29,7 @@ export default {
     Introduction,
     Checks,
     License,
-    SiteDetails,
-    Database,
+    Configuration,
   },
   mounted() {
     this.$store.dispatch('steps/goTo', {

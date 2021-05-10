@@ -67,7 +67,7 @@ export default {
         status: 'complete',
       });
       this.$store.dispatch('steps/goTo', {
-        id: 'site',
+        id: 'config',
       });
     },
   },
