@@ -62,13 +62,13 @@ legend {
   &.input-sm {
     font-size: $font-size-sm;
     height: $control-size-sm;
-    padding: $control-padding-y-sm $control-padding-x-sm;
+    padding: $control-padding-y-sm $control-padding-x;
   }
 
   &.input-lg {
     font-size: $font-size-lg;
     height: $control-size-lg;
-    padding: $control-padding-y-lg $control-padding-x-lg;
+    padding: $control-padding-y-lg $control-padding-x;
   }
 
   &.input-inline {

@@ -8,7 +8,7 @@
           <Introduction v-show="isStepActive('intro')" :key="'intro'" />
           <Checks v-show="isStepActive('checks')" :key="'checks'" />
           <License v-show="isStepActive('license')" :key="'license'" />
-          <Configuration v-show="isStepActive('config')" :key="'config'" />
+          <Configuration v-show="isStepActive('config')" :key="'config'" :site="site" />
         </transition-group>
       </div>
     </div>
@@ -30,6 +30,11 @@ export default {
     Checks,
     License,
     Configuration,
+  },
+  data() {
+    return {
+      site: {},
+    };
   },
   mounted() {
     this.$store.dispatch('steps/goTo', {
