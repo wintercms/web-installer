@@ -9,6 +9,9 @@
           <Checks v-show="isStepActive('checks')" :key="'checks'" />
           <License v-show="isStepActive('license')" :key="'license'" />
           <Configuration v-show="isStepActive('config')" :key="'config'" :site="site" />
+          <FinalChecks v-show="isStepActive('finalChecks')" :key="'finalChecks'" :site="site" />
+          <Installation v-show="isStepActive('installation')" :key="'installation'" :site="site" />
+          <Complete v-show="isStepActive('complete')" :key="'complete'" :site="site" />
         </transition-group>
       </div>
     </div>
@@ -21,6 +24,9 @@ import Introduction from '@/components/steps/Introduction.vue';
 import Checks from '@/components/steps/Checks.vue';
 import License from '@/components/steps/License.vue';
 import Configuration from '@/components/steps/Configuration.vue';
+import FinalChecks from '@/components/steps/FinalChecks.vue';
+import Installation from '@/components/steps/Installation.vue';
+import Complete from '@/components/steps/Complete.vue';
 
 export default {
   name: 'Installer',
@@ -30,6 +36,9 @@ export default {
     Checks,
     License,
     Configuration,
+    FinalChecks,
+    Installation,
+    Complete,
   },
   data() {
     return {
