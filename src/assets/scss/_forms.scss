@@ -1,7 +1,9 @@
 // Forms
 .form-group {
+  position: relative;
+
   &:not(:last-child) {
-    margin-bottom: $layout-spacing;
+    margin-bottom: $layout-spacing-sm;
   }
 }
 
@@ -553,3 +555,45 @@ input {
 .form-inline {
   display: inline-block;
 }
+
+// Form error
+.form-error {
+  display: block;
+  position: absolute;
+  bottom: 25%;
+  left: -25px;
+  height: 36px;
+  line-height: 36px;
+  padding: 0 0 0 $unit-2;
+  transform: translateX(-100%) translateY(50%);
+  box-shadow: 2px 4px 0px 0px rgba(0, 0, 0, 0.08);
+
+  background: $error-color;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: bold;
+  border-top-left-radius: $border-radius;
+  border-bottom-left-radius: $border-radius;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    right: -2px;
+    margin-right: -36px;
+    border: 18px solid transparent;
+    border-left-color: rgba(0, 0, 0, 0.08);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-right: -36px;
+    border: 18px solid transparent;
+    border-left-color: $error-color;
+  }
+}
+
+

@@ -33,7 +33,11 @@ export default {
   },
   data() {
     return {
-      site: {},
+      site: {
+        name: '',
+        url: '',
+        backendUrl: 'backend',
+      },
     };
   },
   mounted() {

@@ -87,6 +87,6 @@ export default {
 
 <style lang="scss">
 .tab-panes {
-  margin-top: $layout-spacing;
+  margin-top: $layout-spacing-sm;
 }
 </style>
