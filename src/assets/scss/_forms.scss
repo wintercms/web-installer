@@ -24,6 +24,7 @@ legend {
   font-family: $heading-font-family;
   font-weight: $heading-font-weight;
   font-size: 1em;
+  margin-bottom: $unit-1;
 
   &.label-sm {
     font-size: 0.9em;
@@ -32,6 +33,12 @@ legend {
   &.label-lg {
     font-size: 1.2em;
   }
+}
+
+.help {
+  display: block;
+  margin-top: $unit-1 * -1;
+  margin-bottom: $unit-1;
 }
 
 // Form element: Input

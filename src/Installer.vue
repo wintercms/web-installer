@@ -37,6 +37,21 @@ export default {
         name: '',
         url: '',
         backendUrl: 'backend',
+        database: {
+          type: 'mysql',
+          host: 'localhost',
+          port: 3306,
+          username: '',
+          password: '',
+          name: '',
+        },
+        admin: {
+          firstName: '',
+          lastName: '',
+          email: '',
+          username: '',
+          password: '',
+        },
       },
     };
   },
@@ -44,6 +59,21 @@ export default {
     this.$store.dispatch('steps/goTo', {
       id: 'intro',
     });
+  },
+  watch: {
+    'site.database.type': {
+      handler(newVal, oldVal) {
+        const defaultPorts = {
+          mysql: 3306,
+          postgres: 5432,
+          sqlsrv: 1433,
+        };
+
+        if (Number(this.site.database.port) === defaultPorts[oldVal] || oldVal === 'sqlite') {
+          this.site.database.port = defaultPorts[newVal];
+        }
+      },
+    },
   },
   methods: {
     isStepActive(id) {
