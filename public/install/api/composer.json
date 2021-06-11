@@ -3,7 +3,8 @@
     "description": "Web-based installer for Winter CMS",
     "type": "project",
     "require": {
-        "illuminate/database": "^6.20.23"
+        "illuminate/database": "^6.20.23",
+        "bennothommo/packager": "^0.1.0"
     },
     "autoload": {
         "psr-4": {
