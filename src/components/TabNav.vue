@@ -1,5 +1,5 @@
 <template>
-  <ul class="tab tab-block max-size">
+  <ul class="tab tab-block">
     <li
       class="tab-item"
       v-for="(tabName, tabKey) in tabs"
@@ -62,13 +62,14 @@ export default {
 @import "~spectre.css/src/tabs";
 
 .tab.tab-block {
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
+  display: inline-block;
   margin: 0;
+  background: darken($gray-color-light, 2%);
+  padding: $unit-2;
+  border-radius: $border-radius;
 
   & > li.tab-item {
-    display: block;
+    display: inline-block;
     flex: 0;
     margin-bottom: -1px;
 
