@@ -8,9 +8,6 @@ export default {
       if (typeof endpoint !== 'string') {
         throw new Error('Endpoint must be provided as a string');
       }
-      if (data && !Array.isArray(data)) {
-        throw new Error('Data must be provided as an array');
-      }
 
       // Allow for API URL override
       let fullUrl = 'api.php';
@@ -31,11 +28,19 @@ export default {
       if (method === 'GET') {
         fullUrl = `${fullUrl}?endpoint=${endpoint}`;
 
+        if (data && !Array.isArray(data)) {
+          throw new Error('Data must be provided as an array');
+        }
+
         if (data && data.length) {
           const dataUrl = data.join('&');
           fullUrl = `${fullUrl}&${dataUrl}`;
         }
       } else {
+        if (data && typeof data !== 'object') {
+          throw new Error('Data must be provided as an object');
+        }
+
         data.endpoint = endpoint;
         postBody = JSON.stringify(data);
       }
