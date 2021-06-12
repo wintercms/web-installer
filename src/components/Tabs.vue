@@ -43,9 +43,10 @@ const tabCollection = new Vue({
       }
       this.refreshTabActiveStates();
     },
-    setActiveTabByKey(key) {
+    setActiveTabByKey(key, parent) {
       this.activeTab = key;
       this.refreshTabActiveStates();
+      parent.$emit('tabchanged', this.tabs[key]);
     },
     removeTab(tab) {
       const key = this.findTab(tab);
@@ -79,7 +80,13 @@ export default {
   },
   methods: {
     setActiveTab(tab) {
-      tabCollection.setActiveTabByKey(Number(tab.replace('tab-', '')));
+      tabCollection.setActiveTabByKey(Number(tab.replace('tab-', '')), this);
+    },
+    setActiveTabByName(name) {
+      const tab = this.tabs.indexOf(name);
+      if (tab !== -1) {
+        this.$refs.tabNav.setTab(tab);
+      }
     },
   },
 };
