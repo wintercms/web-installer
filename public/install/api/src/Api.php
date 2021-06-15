@@ -2,8 +2,27 @@
 
 namespace Winter\Installer;
 
-use ReflectionMethod;
+use Illuminate\Database\Capsule\Manager as Capsule;
 
+use ReflectionMethod;
+use ZipArchive;
+
+/**
+ * API Class
+ * 
+ * Handles the PHP side of the installer process.
+ * 
+ * The API accepts the endpoint in a GET request via the `endpoint` query string, and via the `endpoint` post variable
+ * in a POST request. This class will use a callback in the form of `<method><endpoint>` in camel-case to process the
+ * endpoint (eg. for a POST call to the `createDatabase` endpoint, the API will run the `postCreateDatabase` method).
+ * 
+ * Any data that is sent in the query strings for GET, and in the post data for POST, will be available within this
+ * method inside the `$this->data` variable.
+ * 
+ * @author Ben Thomson <git@alfreido.com>
+ * @author Winter CMS
+ * @since 1.0.0
+ */
 class Api
 {
     // Minimum PHP version required for Winter CMS
@@ -11,6 +30,9 @@ class Api
 
     // Winter CMS Ping API endpoint
     const API_PING_URL = 'https://api.wintercms.com/marketplace/ping';
+
+    // Winter CMS codebase archive
+    const WINTER_ARCHIVE = 'https://github.com/wintercms/winter/archive/refs/heads/1.1.zip';
 
     /** @var string Requested endpoint */
     protected $endpoint;
@@ -24,6 +46,11 @@ class Api
     /** @var int Response code */
     protected $responseCode = 200;
 
+    /**
+     * Main endpoint, processes an incoming request and generates a response.
+     *
+     * @return void
+     */
     public function request()
     {
         $this->parseRequest();
@@ -39,6 +66,13 @@ class Api
         $this->response(true);
     }
 
+    /**
+     * GET /api.php?endpoint=checkApi
+     * 
+     * Checks that the Winter CMS Marketplace API is available.
+     *
+     * @return void
+     */
     public function getCheckApi()
     {
         $contents = @file_get_contents(self::API_PING_URL);
@@ -49,6 +83,13 @@ class Api
         }
     }
 
+    /**
+     * GET /api.php?endpoint=checkPhpVersion
+     * 
+     * Checks that the currently-running version of PHP matches the minimum required for Winter CMS (1.1 branch)
+     *
+     * @return void
+     */
     public function getCheckPhpVersion()
     {
         $hasVersion = version_compare(trim(strtolower(PHP_VERSION)), self::MIN_PHP_VERSION, '>=');
@@ -63,6 +104,13 @@ class Api
         }
     }
 
+    /**
+     * GET /api.php?endpoint=checkPhpExtensions
+     * 
+     * Checks that necessary extensions required for running Winter CMS are installed and enabled.
+     *
+     * @return void
+     */
     public function getCheckPhpExtensions()
     {
         if (!function_exists('curl_init') || !defined('CURLOPT_FOLLOWLOCATION')) {
@@ -91,6 +139,128 @@ class Api
         }
     }
 
+    /**
+     * POST /api.php[endpoint=checkDatabase]
+     * 
+     * Checks that the given database credentials can be used to connect to a valid, empty database.
+     *
+     * @return void
+     */
+    public function postCheckDatabase()
+    {
+        $capsule = new Capsule;
+        $dbConfig = $this->data['site']['database'];
+
+        try {
+            switch ($dbConfig['type']) {
+                case 'sqlite':
+                    $capsule->addConnection([
+                        'driver' => $dbConfig['type'],
+                        'database' => $dbConfig['database'],
+                        'prefix' => '',
+                    ]);
+                    break;
+                default:
+                    $capsule->addConnection([
+                        'driver' => $dbConfig['type'],
+                        'host' => $dbConfig['host'] ?? null,
+                        'port' => $dbConfig['port'] ?? $this->getDefaultDbPort($dbConfig['type']),
+                        'database' => $dbConfig['name'],
+                        'username' => $dbConfig['username'] ?? '',
+                        'password' => $dbConfig['password'] ?? '',
+                        'charset' => 'utf8mb4',
+                        'collation' => 'utf8mb4_unicode_ci',
+                        'prefix' => '',
+                    ]);
+            }
+
+            $connection = $capsule->getConnection();
+            $tables = $connection->getDoctrineSchemaManager()->listTableNames();
+        } catch (\Throwable $e) {
+            $this->data['exception'] = $e->getMessage();
+            $this->error('Database could not be connected to.');
+        }
+
+        if (count($tables)) {
+            $this->data['dbNotEmpty'] = true;
+            $this->error('Database is not empty.');
+        }
+    }
+
+    /**
+     * GET /api.php?endpoint=checkWriteAccess
+     * 
+     * Checks that the current work directory is writable.
+     *
+     * @return void
+     */
+    public function getCheckWriteAccess()
+    {
+        if (!is_writable(getcwd())) {
+            $this->data['writable'] = false;
+            $this->error('Current working directory is not writable.');
+        }
+
+        $this->data['writable'] = true;
+    }
+
+    /**
+     * POST /api.php[endpoint=downloadWinter]
+     * 
+     * Downloads the Winter CMS codebase from the 1.1 branch.
+     *
+     * @return void
+     */
+    public function postDownloadWinter()
+    {
+        $winterZip = getcwd() . DIRECTORY_SEPARATOR . 'winter.zip';
+
+        try {
+            file_put_contents(
+                $winterZip,
+                file_get_contents(self::WINTER_ARCHIVE)
+            );
+
+            $zip = new ZipArchive();
+            $zip->open($winterZip);
+        } catch (\Throwable $e) {
+            $this->error('Unable to download or extract Winter CMS. ' . $e->getMessage());
+        }
+
+        for ($i = 0; $i < $zip->numFiles; ++$i) {
+            $zipFile = $zip->getNameIndex($i);
+            $destFile = str_replace('winter-1.1/', '', $zipFile);
+            
+        }
+    }
+
+    /**
+     * Determines the default port number for the given database type.
+     *
+     * @param string $type
+     * @return integer
+     */
+    protected function getDefaultDbPort(string $type): int
+    {
+        switch ($type) {
+            case 'mysql':
+                return 3306;
+            case 'pgsql':
+                return 5432;
+            case 'sqlsrv':
+                return 1433;
+            default:
+                throw new \Exception('Invalid database type provided');
+        }
+    }
+
+    /**
+     * Parses an incoming request for use in this API class.
+     * 
+     * The method will be available in `$this->method`. Any request data will be available in `$this->data`.
+     *
+     * @return void
+     */
     protected function parseRequest()
     {
         $this->method = $_SERVER['REQUEST_METHOD'];
@@ -128,6 +298,11 @@ class Api
         }
     }
 
+    /**
+     * Determines if the correct API handler method is available.
+     *
+     * @return void
+     */
     protected function getRequestedMethod()
     {
         $method = strtolower($this->method) . ucfirst($this->endpoint);
@@ -144,11 +319,23 @@ class Api
         return $method;
     }
 
+    /**
+     * Sets the HTTP response code.
+     *
+     * @param integer $code
+     * @return void
+     */
     protected function setResponseCode(int $code)
     {
         $this->responseCode = $code;
     }
 
+    /**
+     * Generates and echoes a JSON response to the browser.
+     *
+     * @param boolean $success Is this is a successful response?
+     * @return void
+     */
     protected function response(bool $success = true)
     {
         $response = [
@@ -177,6 +364,13 @@ class Api
         exit(0);
     }
 
+    /**
+     * Shortcut to generate a failure response for simple error message responses.
+     *
+     * @param string $message Message to return.
+     * @param integer $code HTTP code to return.
+     * @return void
+     */
     protected function error(string $message, int $code = 500)
     {
         $this->setResponseCode($code);
