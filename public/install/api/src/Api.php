@@ -5,6 +5,7 @@ namespace Winter\Installer;
 use Illuminate\Database\Capsule\Manager as Capsule;
 
 use ReflectionMethod;
+use ZipArchive;
 
 /**
  * API Class
@@ -29,6 +30,9 @@ class Api
 
     // Winter CMS Ping API endpoint
     const API_PING_URL = 'https://api.wintercms.com/marketplace/ping';
+
+    // Winter CMS codebase archive
+    const WINTER_ARCHIVE = 'https://github.com/wintercms/winter/archive/refs/heads/1.1.zip';
 
     /** @var string Requested endpoint */
     protected $endpoint;
@@ -180,6 +184,53 @@ class Api
         if (count($tables)) {
             $this->data['dbNotEmpty'] = true;
             $this->error('Database is not empty.');
+        }
+    }
+
+    /**
+     * GET /api.php?endpoint=checkWriteAccess
+     * 
+     * Checks that the current work directory is writable.
+     *
+     * @return void
+     */
+    public function getCheckWriteAccess()
+    {
+        if (!is_writable(getcwd())) {
+            $this->data['writable'] = false;
+            $this->error('Current working directory is not writable.');
+        }
+
+        $this->data['writable'] = true;
+    }
+
+    /**
+     * POST /api.php[endpoint=downloadWinter]
+     * 
+     * Downloads the Winter CMS codebase from the 1.1 branch.
+     *
+     * @return void
+     */
+    public function postDownloadWinter()
+    {
+        $winterZip = getcwd() . DIRECTORY_SEPARATOR . 'winter.zip';
+
+        try {
+            file_put_contents(
+                $winterZip,
+                file_get_contents(self::WINTER_ARCHIVE)
+            );
+
+            $zip = new ZipArchive();
+            $zip->open($winterZip);
+        } catch (\Throwable $e) {
+            $this->error('Unable to download or extract Winter CMS. ' . $e->getMessage());
+        }
+
+        for ($i = 0; $i < $zip->numFiles; ++$i) {
+            $zipFile = $zip->getNameIndex($i);
+            $destFile = str_replace('winter-1.1/', '', $zipFile);
+            
         }
     }
 
