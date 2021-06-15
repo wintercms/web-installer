@@ -4,6 +4,7 @@
     "type": "project",
     "require": {
         "illuminate/database": "^6.20.23",
+        "doctrine/dbal": "^2.12",
         "bennothommo/packager": "^0.1.0"
     },
     "autoload": {

@@ -2,6 +2,8 @@
 
 namespace Winter\Installer;
 
+use Illuminate\Database\Capsule\Manager as Capsule;
+
 use ReflectionMethod;
 
 /**
@@ -130,6 +132,74 @@ class Api
                 $this->data['extension'] = $ext;
                 $this->error('Missing extension');
             }
+        }
+    }
+
+    /**
+     * POST /api.php[endpoint=checkDatabase]
+     * 
+     * Checks that the given database credentials can be used to connect to a valid, empty database.
+     *
+     * @return void
+     */
+    public function postCheckDatabase()
+    {
+        $capsule = new Capsule;
+        $dbConfig = $this->data['site']['database'];
+
+        try {
+            switch ($dbConfig['type']) {
+                case 'sqlite':
+                    $capsule->addConnection([
+                        'driver' => $dbConfig['type'],
+                        'database' => $dbConfig['database'],
+                        'prefix' => '',
+                    ]);
+                    break;
+                default:
+                    $capsule->addConnection([
+                        'driver' => $dbConfig['type'],
+                        'host' => $dbConfig['host'] ?? null,
+                        'port' => $dbConfig['port'] ?? $this->getDefaultDbPort($dbConfig['type']),
+                        'database' => $dbConfig['name'],
+                        'username' => $dbConfig['username'] ?? '',
+                        'password' => $dbConfig['password'] ?? '',
+                        'charset' => 'utf8mb4',
+                        'collation' => 'utf8mb4_unicode_ci',
+                        'prefix' => '',
+                    ]);
+            }
+
+            $connection = $capsule->getConnection();
+            $tables = $connection->getDoctrineSchemaManager()->listTableNames();
+        } catch (\Throwable $e) {
+            $this->data['exception'] = $e->getMessage();
+            $this->error('Database could not be connected to.');
+        }
+
+        if (count($tables)) {
+            $this->data['dbNotEmpty'] = true;
+            $this->error('Database is not empty.');
+        }
+    }
+
+    /**
+     * Determines the default port number for the given database type.
+     *
+     * @param string $type
+     * @return integer
+     */
+    protected function getDefaultDbPort(string $type): int
+    {
+        switch ($type) {
+            case 'mysql':
+                return 3306;
+            case 'pgsql':
+                return 5432;
+            case 'sqlsrv':
+                return 1433;
+            default:
+                throw new \Exception('Invalid database type provided');
         }
     }
 
