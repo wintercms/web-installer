@@ -4,6 +4,22 @@ namespace Winter\Installer;
 
 use ReflectionMethod;
 
+/**
+ * API Class
+ * 
+ * Handles the PHP side of the installer process.
+ * 
+ * The API accepts the endpoint in a GET request via the `endpoint` query string, and via the `endpoint` post variable
+ * in a POST request. This class will use a callback in the form of `<method><endpoint>` in camel-case to process the
+ * endpoint (eg. for a POST call to the `createDatabase` endpoint, the API will run the `postCreateDatabase` method).
+ * 
+ * Any data that is sent in the query strings for GET, and in the post data for POST, will be available within this
+ * method inside the `$this->data` variable.
+ * 
+ * @author Ben Thomson <git@alfreido.com>
+ * @author Winter CMS
+ * @since 1.0.0
+ */
 class Api
 {
     // Minimum PHP version required for Winter CMS
@@ -24,6 +40,11 @@ class Api
     /** @var int Response code */
     protected $responseCode = 200;
 
+    /**
+     * Main endpoint, processes an incoming request and generates a response.
+     *
+     * @return void
+     */
     public function request()
     {
         $this->parseRequest();
@@ -39,6 +60,13 @@ class Api
         $this->response(true);
     }
 
+    /**
+     * GET /api.php?endpoint=checkApi
+     * 
+     * Checks that the Winter CMS Marketplace API is available.
+     *
+     * @return void
+     */
     public function getCheckApi()
     {
         $contents = @file_get_contents(self::API_PING_URL);
@@ -49,6 +77,13 @@ class Api
         }
     }
 
+    /**
+     * GET /api.php?endpoint=checkPhpVersion
+     * 
+     * Checks that the currently-running version of PHP matches the minimum required for Winter CMS (1.1 branch)
+     *
+     * @return void
+     */
     public function getCheckPhpVersion()
     {
         $hasVersion = version_compare(trim(strtolower(PHP_VERSION)), self::MIN_PHP_VERSION, '>=');
@@ -63,6 +98,13 @@ class Api
         }
     }
 
+    /**
+     * GET /api.php?endpoint=checkPhpExtensions
+     * 
+     * Checks that necessary extensions required for running Winter CMS are installed and enabled.
+     *
+     * @return void
+     */
     public function getCheckPhpExtensions()
     {
         if (!function_exists('curl_init') || !defined('CURLOPT_FOLLOWLOCATION')) {
@@ -91,6 +133,13 @@ class Api
         }
     }
 
+    /**
+     * Parses an incoming request for use in this API class.
+     * 
+     * The method will be available in `$this->method`. Any request data will be available in `$this->data`.
+     *
+     * @return void
+     */
     protected function parseRequest()
     {
         $this->method = $_SERVER['REQUEST_METHOD'];
@@ -128,6 +177,11 @@ class Api
         }
     }
 
+    /**
+     * Determines if the correct API handler method is available.
+     *
+     * @return void
+     */
     protected function getRequestedMethod()
     {
         $method = strtolower($this->method) . ucfirst($this->endpoint);
@@ -144,11 +198,23 @@ class Api
         return $method;
     }
 
+    /**
+     * Sets the HTTP response code.
+     *
+     * @param integer $code
+     * @return void
+     */
     protected function setResponseCode(int $code)
     {
         $this->responseCode = $code;
     }
 
+    /**
+     * Generates and echoes a JSON response to the browser.
+     *
+     * @param boolean $success Is this is a successful response?
+     * @return void
+     */
     protected function response(bool $success = true)
     {
         $response = [
@@ -177,6 +243,13 @@ class Api
         exit(0);
     }
 
+    /**
+     * Shortcut to generate a failure response for simple error message responses.
+     *
+     * @param string $message Message to return.
+     * @param integer $code HTTP code to return.
+     * @return void
+     */
     protected function error(string $message, int $code = 500)
     {
         $this->setResponseCode($code);
