@@ -106,7 +106,7 @@
                     ref="firstField"
                   >
                     <option value="mysql">MySQL / MariaDB</option>
-                    <option value="postgres">PostgreSQL</option>
+                    <option value="pgsql">PostgreSQL</option>
                     <option value="sqlsrv">SQL Server</option>
                     <option value="sqlite">SQLite</option>
                   </select>

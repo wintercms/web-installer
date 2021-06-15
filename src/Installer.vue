@@ -74,7 +74,7 @@ export default {
       handler(newVal, oldVal) {
         const defaultPorts = {
           mysql: 3306,
-          postgres: 5432,
+          pgsql: 5432,
           sqlsrv: 1433,
         };
 
