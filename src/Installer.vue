@@ -5,13 +5,40 @@
 
       <div class="content">
         <transition-group name="fade">
-          <Introduction v-show="isStepActive('intro')" :key="'intro'" />
-          <Checks v-show="isStepActive('checks')" :key="'checks'" />
-          <License v-show="isStepActive('license')" :key="'license'" />
-          <Configuration v-show="isStepActive('config')" :key="'config'" :site="site" />
-          <FinalChecks v-show="isStepActive('finalChecks')" :key="'finalChecks'" :site="site" />
-          <Installation v-show="isStepActive('installation')" :key="'installation'" :site="site" />
-          <Complete v-show="isStepActive('complete')" :key="'complete'" :site="site" />
+          <Introduction
+            v-show="isStepActive('intro')"
+            :key="'intro'"
+          />
+          <Checks
+            v-show="isStepActive('checks')"
+            :key="'checks'"
+          />
+          <License
+            v-show="isStepActive('license')"
+            :key="'license'"
+          />
+          <Configuration
+            v-show="isStepActive('config')"
+            :key="'config'"
+            :site="site"
+            :installing="installing"
+          />
+          <FinalChecks
+            v-show="isStepActive('finalChecks')"
+            :key="'finalChecks'"
+            :site="site"
+          />
+          <Installation
+            v-show="isStepActive('installation')"
+            :key="'installation'"
+            :site="site"
+            :installing="installing"
+          />
+          <Complete
+            v-show="isStepActive('complete')"
+            :key="'complete'"
+            :site="site"
+          />
         </transition-group>
       </div>
     </div>
