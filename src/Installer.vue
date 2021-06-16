@@ -42,6 +42,7 @@ export default {
   },
   data() {
     return {
+      installing: false,
       site: {
         name: '',
         url: '',

@@ -28,6 +28,7 @@
                       v-model="site.name"
                       ref="firstField"
                       tabindex="1"
+                      :disabled="installing"
                     >
                     <transition name="fade">
                       <div v-if="dirty && errors.length" class="form-error" v-text="errors[0]">
@@ -57,6 +58,7 @@
                       placeholder="Enter your site URL"
                       v-model="site.url"
                       tabindex="2"
+                      :disabled="installing"
                     >
                     <transition name="fade">
                       <div v-if="dirty && errors.length" class="form-error" v-text="errors[0]">
@@ -86,6 +88,7 @@
                       placeholder="Enter your backend URL keyword"
                       v-model="site.backendUrl"
                       tabindex="3"
+                      :disabled="installing"
                     >
                     <transition name="fade">
                       <div v-if="dirty && errors.length" class="form-error" v-text="errors[0]">
@@ -107,6 +110,7 @@
                     name="databaseType"
                     v-model="site.database.type"
                     tabindex="4"
+                    :disabled="installing"
                   >
                     <option value="mysql">MySQL / MariaDB</option>
                     <option value="pgsql">PostgreSQL</option>
@@ -137,6 +141,7 @@
                       placeholder="Enter the database server hostname"
                       v-model="site.database.host"
                       tabindex="5"
+                      :disabled="installing"
                     >
                     <transition name="fade">
                       <div v-if="dirty && errors.length" class="form-error" v-text="errors[0]">
@@ -153,6 +158,7 @@
                     name="databaseUser"
                     v-model="site.database.user"
                     tabindex="7"
+                    :disabled="installing"
                   >
                 </div>
 
@@ -173,6 +179,7 @@
                       placeholder="Enter the database name"
                       v-model="site.database.name"
                       tabindex="9"
+                      :disabled="installing"
                     >
                     <transition name="fade">
                       <div v-if="dirty && errors.length" class="form-error" v-text="errors[0]">
@@ -199,6 +206,7 @@
                       placeholder="Enter the database server port"
                       v-model="site.database.port"
                       tabindex="6"
+                      :disabled="installing"
                     >
                     <transition name="fade">
                       <div v-if="dirty && errors.length" class="form-error" v-text="errors[0]">
@@ -215,6 +223,7 @@
                     name="databasePass"
                     v-model="site.database.pass"
                     tabindex="8"
+                    :disabled="installing"
                   >
                 </div>
               </div>
@@ -239,6 +248,7 @@
                       placeholder="Enter the path to the SQLite database"
                       v-model="site.database.name"
                       tabindex="9"
+                      :disabled="installing"
                     >
                     <transition name="fade">
                       <div v-if="dirty && errors.length" class="form-error" v-text="errors[0]">
@@ -269,6 +279,7 @@
                       placeholder="Enter the admin's first name"
                       v-model="site.admin.firstName"
                       tabindex="10"
+                      :disabled="installing"
                     >
                     <transition name="fade">
                       <div v-if="dirty && errors.length" class="form-error" v-text="errors[0]">
@@ -294,6 +305,7 @@
                       placeholder="Enter the admin username"
                       v-model="site.admin.username"
                       tabindex="12"
+                      :disabled="installing"
                     >
                     <transition name="fade">
                       <div v-if="dirty && errors.length" class="form-error" v-text="errors[0]">
@@ -319,6 +331,7 @@
                       placeholder="Enter the admin email address"
                       v-model="site.admin.email"
                       tabindex="14"
+                      :disabled="installing"
                     >
                     <transition name="fade">
                       <div v-if="dirty && errors.length" class="form-error" v-text="errors[0]">
@@ -345,6 +358,7 @@
                       placeholder="Enter the admin's surname"
                       v-model="site.admin.lastName"
                       tabindex="11"
+                      :disabled="installing"
                     >
                     <transition name="fade">
                       <div v-if="dirty && errors.length" class="form-error" v-text="errors[0]">
@@ -370,6 +384,7 @@
                       placeholder="Enter the admin's password"
                       v-model="site.admin.password"
                       tabindex="13"
+                      :disabled="installing"
                     >
                     <transition name="fade">
                       <div v-if="dirty && errors.length" class="form-error" v-text="errors[0]">
@@ -439,7 +454,7 @@ extend('backendUrl', (value) => {
   return 'Invalid backend URL keyword.';
 });
 extend('url', (value) => {
-  const regex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
+  const regex = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}(\.[a-zA-Z0-9()]{1,6})*\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/;
   if (regex.test(value)) {
     return true;
   }
