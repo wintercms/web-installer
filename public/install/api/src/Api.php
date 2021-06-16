@@ -366,6 +366,21 @@ class Api
         } catch (\Throwable $e) {
             $this->error('Unable to write config. ' . $e->getMessage());
         }
+
+        // Force cache flush
+        $opcacheEnabled = ini_get('opcache.enable');
+        $opcachePath = trim(ini_get('opcache.restrict_api'));
+
+        if (!empty($opcachePath) && !starts_with(__FILE__, $opcachePath)) {
+            $opcacheEnabled = false;
+        }
+
+        if (function_exists('opcache_reset') && $opcacheEnabled) {
+            opcache_reset();
+        }
+        if (function_exists('apc_clear_cache')) {
+            apc_clear_cache();
+        }
     }
 
     /**
@@ -380,6 +395,7 @@ class Api
         try {
             $this->bootFramework();
 
+            \Illuminate\Support\Facades\Artisan::call('config:clear');
             \Illuminate\Support\Facades\Artisan::call('october:up');
         } catch (\Throwable $e) {
             $this->error('Unable to run migrations. ' . $e->getMessage());
