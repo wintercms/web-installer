@@ -22,7 +22,8 @@
     <div class="step-actions">
       <Click
         :label="buttonLabel"
-        :flag="(completedChecks && !checksSuccessful) ? 'error' : 'primary'"
+        :size="(completedChecks && checksSuccessful) ? 'lg' : 'md'"
+        :flag="(completedChecks && !checksSuccessful) ? 'error' : 'success'"
         :disabled="!completedChecks"
         @press="onPress"
       />
@@ -58,7 +59,7 @@ export default {
       if (!this.checksSuccessful) {
         return 'Re-run checks';
       }
-      return 'Begin the install';
+      return 'Begin the installation';
     },
     isActive() {
       return this.$store.getters['steps/isActive'](this.stepId);
@@ -105,8 +106,8 @@ export default {
       this.ranChecks = true;
 
       Promise.all([
-        this.$api('POST', 'checkDatabase', this.site),
-        this.$api('GET', 'checkFolderIsWritable'),
+        this.$api('POST', 'checkDatabase', { site: this.site }),
+        this.$api('GET', 'checkWriteAccess'),
       ]).then(
         (responses) => {
           this.completedChecks = true;
@@ -169,6 +170,9 @@ export default {
       this.$store.dispatch('steps/setStatus', {
         id: 'finalChecks',
         status: 'complete',
+      });
+      this.$store.dispatch('steps/goTo', {
+        id: 'installation',
       });
     },
   },
