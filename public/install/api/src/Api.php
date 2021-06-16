@@ -359,8 +359,8 @@ class Api
                     'connections.' . $dbConfig['type'] . '.host' => $dbConfig['host'],
                     'connections.' . $dbConfig['type'] . '.port' => $dbConfig['port'],
                     'connections.' . $dbConfig['type'] . '.database' => $dbConfig['name'],
-                    'connections.' . $dbConfig['type'] . '.username' => $dbConfig['username'],
-                    'connections.' . $dbConfig['type'] . '.password' => $dbConfig['password'],
+                    'connections.' . $dbConfig['type'] . '.username' => $dbConfig['user'],
+                    'connections.' . $dbConfig['type'] . '.password' => $dbConfig['pass'],
                 ]);
             }
         } catch (\Throwable $e) {
@@ -613,8 +613,8 @@ class Api
                     'host' => $dbConfig['host'] ?? null,
                     'port' => $dbConfig['port'] ?? $this->getDefaultDbPort($dbConfig['type']),
                     'database' => $dbConfig['name'],
-                    'username' => $dbConfig['username'] ?? '',
-                    'password' => $dbConfig['password'] ?? '',
+                    'username' => $dbConfig['user'] ?? '',
+                    'password' => $dbConfig['pass'] ?? '',
                     'charset' => 'utf8mb4',
                     'collation' => 'utf8mb4_unicode_ci',
                     'prefix' => '',
