@@ -1,0 +1,39 @@
+// Bars
+.bar {
+  background: darken($gray-color-light, 5%);
+  border-radius: $border-radius;
+  display: flex;
+  flex-wrap: nowrap;
+  height: $unit-4;
+  width: 100%;
+  margin-bottom: $layout-spacing;
+
+  &.bar-sm {
+    height: $unit-1;
+  }
+
+  // TODO: attr() support
+  .bar-item {
+    background: $primary-color;
+    color: $light-color;
+    display: block;
+    font-size: $font-size-sm;
+    flex-shrink: 0;
+    line-height: $unit-4;
+    height: 100%;
+    position: relative;
+    text-align: center;
+    width: 0;
+    transition: width 350ms ease;
+
+    &:first-child {
+      border-bottom-left-radius: $border-radius;
+      border-top-left-radius: $border-radius;
+    }
+    &:last-child {
+      border-bottom-right-radius: $border-radius;
+      border-top-right-radius: $border-radius;
+      flex-shrink: 1;
+    }
+  }
+}
