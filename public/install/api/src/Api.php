@@ -418,23 +418,19 @@ class Api
     }
 
     /**
-     * Determines the default port number for the given database type.
+     * POST /api.php[endpoint=cleanUp]
      *
-     * @param string $type
-     * @return integer
+     * Cleans up and removes the installer and Composer cache.
+     *
+     * @return void
      */
-    protected function getDefaultDbPort(string $type): int
+    public function postCleanUp()
     {
-        switch ($type) {
-            case 'mysql':
-                return 3306;
-            case 'pgsql':
-                return 5432;
-            case 'sqlsrv':
-                return 1433;
-            default:
-                throw new \Exception('Invalid database type provided');
-        }
+        @unlink($this->rootDir('winter.zip'));
+        @unlink($this->rootDir('install.html'));
+
+        $this->rimraf($this->rootDir('install'));
+        $this->rimraf(sys_get_temp_dir() . DIRECTORY_SEPARATOR . '.composer');
     }
 
     /**
@@ -574,6 +570,26 @@ class Api
     }
 
     /**
+     * Determines the default port number for the given database type.
+     *
+     * @param string $type
+     * @return integer
+     */
+    protected function getDefaultDbPort(string $type): int
+    {
+        switch ($type) {
+            case 'mysql':
+                return 3306;
+            case 'pgsql':
+                return 5432;
+            case 'sqlsrv':
+                return 1433;
+            default:
+                throw new \Exception('Invalid database type provided');
+        }
+    }
+
+    /**
      * Creates a database capsule.
      *
      * @param array $dbConfig
@@ -650,5 +666,29 @@ class Api
         }
 
         return $key;
+    }
+
+    /**
+     * PHP-based "rm -rf" command.
+     * 
+     * Recursively removes a directory and all files and subdirectories within.
+     */
+    protected function rimraf(string $path)
+    {
+        $dir = new DirectoryIterator($path);
+
+        foreach ($dir as $item) {
+            if ($item->isDot()) {
+                continue;
+            }
+
+            if ($item->isDir()) {
+                $this->rimraf($item->getPathname());
+            }
+
+            @unlink($item->getPathname());
+        }
+
+        @rmdir($path);
     }
 }
