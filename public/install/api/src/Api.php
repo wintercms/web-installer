@@ -196,7 +196,7 @@ class Api
      */
     public function getCheckWriteAccess()
     {
-        if (!is_writable(getcwd())) {
+        if (!is_writable($this->rootDir())) {
             $this->data['writable'] = false;
             $this->error('Current working directory is not writable.');
         }
@@ -213,24 +213,38 @@ class Api
      */
     public function postDownloadWinter()
     {
-        $winterZip = getcwd() . DIRECTORY_SEPARATOR . 'winter.zip';
+        $winterZip = $this->rootDir('winter.zip');
+
+        if (!file_exists($winterZip)) {
+            try {
+                file_put_contents(
+                    $winterZip,
+                    file_get_contents(self::WINTER_ARCHIVE)
+                );
+            } catch (\Throwable $e) {
+                $this->error('Unable to download Winter CMS. ' . $e->getMessage());
+            }
+        }
 
         try {
-            file_put_contents(
-                $winterZip,
-                file_get_contents(self::WINTER_ARCHIVE)
-            );
-
             $zip = new ZipArchive();
             $zip->open($winterZip);
         } catch (\Throwable $e) {
-            $this->error('Unable to download or extract Winter CMS. ' . $e->getMessage());
+            $this->error('Unable to extract Winter CMS. ' . $e->getMessage());
         }
 
         for ($i = 0; $i < $zip->numFiles; ++$i) {
             $zipFile = $zip->getNameIndex($i);
-            $destFile = str_replace('winter-1.1/', '', $zipFile);
-            
+            $stat = $zip->statIndex($i);
+            $isDir = ((substr($zipFile, -1) === '/' || substr($zipFile, -1) === '\\') && $stat['size'] === 0);
+            $destPath = $this->rootDir(str_replace('winter-1.1/', '', $zipFile));
+
+            if ($isDir) {
+                mkdir($destPath, 0755, true);
+            } else {
+                copy('zip://' . $zipFile, $destPath);
+                chmod($destPath, 0644);
+            }
         }
     }
 
@@ -376,5 +390,17 @@ class Api
         $this->setResponseCode($code);
         $this->data['error'] = $message;
         $this->response(false);
+    }
+
+    /**
+     * Gets the root directory of the install path.
+     * 
+     * @return string
+     */
+    protected function rootDir(string $suffix = '')
+    {
+        $suffix = ltrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $suffix), '/\\');
+
+        return dirname(dirname(dirname(__DIR__))) . (!empty($suffix) ? DIRECTORY_SEPARATOR . $suffix : '');
     }
 }
