@@ -16,7 +16,7 @@ say() {
 prepare_command() {
     local COMMAND="$1"
     
-    if [ "$SCILENT" ]; then
+    if [ "$SILENT" ]; then
         COMMAND="${COMMAND} > /dev/null 2>&1"
     fi
 
@@ -38,12 +38,12 @@ if [ -z "$COMPOSER_PATH" ]; then
 fi
 
 VERBOSE=""
-SCILENT=""
+SILENT=""
 
 while getopts hsv opts; do
     case ${opts} in
         h) usage && exit 0 ;;
-        s) SCILENT=1 ;;
+        s) SILENT=1 ;;
         v) VERBOSE=1 ;;
         *);;
     esac
