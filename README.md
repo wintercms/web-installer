@@ -1,7 +1,5 @@
 # Winter CMS Web Installer
 
-[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/wintercms/web-installer-vue/Tests/main?label=tests&style=flat-square)](https://github.com/wintercms/web-installer-vue/actions)
-[![Codecov](https://img.shields.io/codecov/c/github/wintercms/web-installer-vue?style=flat-square)](https://codecov.io/gh/wintercms/web-installer-vue)
 [![Discord](https://img.shields.io/discord/816852513684193281?label=discord&style=flat-square)](https://discord.gg/D5MFSPH6Ux)
 
 A web-based installation script that will install a fresh copy of Winter CMS. This is the recommended method of installation for **non-technical users**. It is simpler than the command-line installation or Composer methods and does not require any special skills.
