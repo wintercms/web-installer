@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "bennothommo/packager",
-            "version": "v0.1.0",
+            "version": "v0.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bennothommo/packager.git",
-                "reference": "3604e57b3ab54179166a3d0da16a42f84bfa63b9"
+                "reference": "03497cb325d63fc701217e3168813f031c8d9a4d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bennothommo/packager/zipball/3604e57b3ab54179166a3d0da16a42f84bfa63b9",
-                "reference": "3604e57b3ab54179166a3d0da16a42f84bfa63b9",
+                "url": "https://api.github.com/repos/bennothommo/packager/zipball/03497cb325d63fc701217e3168813f031c8d9a4d",
+                "reference": "03497cb325d63fc701217e3168813f031c8d9a4d",
                 "shasum": ""
             },
             "require": {
@@ -56,9 +56,9 @@
             ],
             "support": {
                 "issues": "https://github.com/bennothommo/packager/issues",
-                "source": "https://github.com/bennothommo/packager/tree/v0.1.0"
+                "source": "https://github.com/bennothommo/packager/tree/v0.1.1"
             },
-            "time": "2021-06-10T13:58:14+00:00"
+            "time": "2021-06-16T08:12:21+00:00"
         },
         {
             "name": "composer/ca-bundle",
@@ -967,7 +967,7 @@
         },
         {
             "name": "illuminate/container",
-            "version": "v6.20.27",
+            "version": "v6.20.28",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/container.git",
@@ -1015,7 +1015,7 @@
         },
         {
             "name": "illuminate/contracts",
-            "version": "v6.20.27",
+            "version": "v6.20.28",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/contracts.git",
@@ -1063,7 +1063,7 @@
         },
         {
             "name": "illuminate/database",
-            "version": "v6.20.27",
+            "version": "v6.20.28",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/database.git",
@@ -1128,7 +1128,7 @@
         },
         {
             "name": "illuminate/support",
-            "version": "v6.20.27",
+            "version": "v6.20.28",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/support.git",

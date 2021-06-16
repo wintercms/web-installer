@@ -2,23 +2,24 @@
 
 namespace Winter\Installer;
 
-use Illuminate\Database\Capsule\Manager as Capsule;
-
-use ReflectionMethod;
 use ZipArchive;
+use ReflectionMethod;
+use DirectoryIterator;
+use BennoThommo\Packager\Composer;
+use Illuminate\Database\Capsule\Manager as Capsule;
 
 /**
  * API Class
- * 
+ *
  * Handles the PHP side of the installer process.
- * 
+ *
  * The API accepts the endpoint in a GET request via the `endpoint` query string, and via the `endpoint` post variable
  * in a POST request. This class will use a callback in the form of `<method><endpoint>` in camel-case to process the
  * endpoint (eg. for a POST call to the `createDatabase` endpoint, the API will run the `postCreateDatabase` method).
- * 
+ *
  * Any data that is sent in the query strings for GET, and in the post data for POST, will be available within this
  * method inside the `$this->data` variable.
- * 
+ *
  * @author Ben Thomson <git@alfreido.com>
  * @author Winter CMS
  * @since 1.0.0
@@ -33,6 +34,9 @@ class Api
 
     // Winter CMS codebase archive
     const WINTER_ARCHIVE = 'https://github.com/wintercms/winter/archive/refs/heads/1.1.zip';
+
+    // Archive subfolder
+    const ARCHIVE_SUBFOLDER = 'winter-1.1/';
 
     /** @var string Requested endpoint */
     protected $endpoint;
@@ -68,7 +72,7 @@ class Api
 
     /**
      * GET /api.php?endpoint=checkApi
-     * 
+     *
      * Checks that the Winter CMS Marketplace API is available.
      *
      * @return void
@@ -85,7 +89,7 @@ class Api
 
     /**
      * GET /api.php?endpoint=checkPhpVersion
-     * 
+     *
      * Checks that the currently-running version of PHP matches the minimum required for Winter CMS (1.1 branch)
      *
      * @return void
@@ -106,7 +110,7 @@ class Api
 
     /**
      * GET /api.php?endpoint=checkPhpExtensions
-     * 
+     *
      * Checks that necessary extensions required for running Winter CMS are installed and enabled.
      *
      * @return void
@@ -141,39 +145,17 @@ class Api
 
     /**
      * POST /api.php[endpoint=checkDatabase]
-     * 
+     *
      * Checks that the given database credentials can be used to connect to a valid, empty database.
      *
      * @return void
      */
     public function postCheckDatabase()
     {
-        $capsule = new Capsule;
         $dbConfig = $this->data['site']['database'];
 
         try {
-            switch ($dbConfig['type']) {
-                case 'sqlite':
-                    $capsule->addConnection([
-                        'driver' => $dbConfig['type'],
-                        'database' => $dbConfig['database'],
-                        'prefix' => '',
-                    ]);
-                    break;
-                default:
-                    $capsule->addConnection([
-                        'driver' => $dbConfig['type'],
-                        'host' => $dbConfig['host'] ?? null,
-                        'port' => $dbConfig['port'] ?? $this->getDefaultDbPort($dbConfig['type']),
-                        'database' => $dbConfig['name'],
-                        'username' => $dbConfig['username'] ?? '',
-                        'password' => $dbConfig['password'] ?? '',
-                        'charset' => 'utf8mb4',
-                        'collation' => 'utf8mb4_unicode_ci',
-                        'prefix' => '',
-                    ]);
-            }
-
+            $capsule = $this->createCapsule($dbConfig);
             $connection = $capsule->getConnection();
             $tables = $connection->getDoctrineSchemaManager()->listTableNames();
         } catch (\Throwable $e) {
@@ -189,7 +171,7 @@ class Api
 
     /**
      * GET /api.php?endpoint=checkWriteAccess
-     * 
+     *
      * Checks that the current work directory is writable.
      *
      * @return void
@@ -206,7 +188,7 @@ class Api
 
     /**
      * POST /api.php[endpoint=downloadWinter]
-     * 
+     *
      * Downloads the Winter CMS codebase from the 1.1 branch.
      *
      * @return void
@@ -225,6 +207,23 @@ class Api
                 $this->error('Unable to download Winter CMS. ' . $e->getMessage());
             }
         }
+    }
+
+    /**
+     * POST /api.php[endpoint=extractWinter]
+     *
+     * Extracts the downloaded ZIP file.
+     *
+     * @return void
+     */
+    public function postExtractWinter()
+    {
+        $winterZip = $this->rootDir('winter.zip');
+
+        if (!file_exists($winterZip)) {
+            $this->error('Winter CMS Zip file not found.');
+            return;
+        }
 
         try {
             $zip = new ZipArchive();
@@ -233,19 +232,154 @@ class Api
             $this->error('Unable to extract Winter CMS. ' . $e->getMessage());
         }
 
-        for ($i = 0; $i < $zip->numFiles; ++$i) {
-            $zipFile = $zip->getNameIndex($i);
-            $stat = $zip->statIndex($i);
-            $isDir = ((substr($zipFile, -1) === '/' || substr($zipFile, -1) === '\\') && $stat['size'] === 0);
-            $destPath = $this->rootDir(str_replace('winter-1.1/', '', $zipFile));
+        $zip->extractTo($this->rootDir());
 
-            if ($isDir) {
-                mkdir($destPath, 0755, true);
-            } else {
-                copy('zip://' . $zipFile, $destPath);
-                chmod($destPath, 0644);
+        if (!empty(self::ARCHIVE_SUBFOLDER)) {
+            // Move files from subdirectory into install folder
+            $dir = new DirectoryIterator($this->rootDir(self::ARCHIVE_SUBFOLDER));
+
+            foreach ($dir as $item) {
+                if ($item->isDot()) {
+                    continue;
+                }
+
+                $relativePath = str_replace($this->rootDir(self::ARCHIVE_SUBFOLDER), '', $item->getPathname());
+
+                rename($item->getPathname(), $this->rootDir($relativePath));
             }
         }
+
+        // Clean up
+        $zip->close();
+        rmdir($this->rootDir(self::ARCHIVE_SUBFOLDER));
+
+        // Make artisan command-line tool executable
+        chmod($this->rootDir('artisan'), 0755);
+    }
+
+    /**
+     * POST /api.php[endpoint=lockDependencies]
+     *
+     * Locks the Composer dependencies for Winter CMS in composer.lock
+     *
+     * @return void
+     */
+    public function postLockDependencies()
+    {
+        set_time_limit(60);
+
+        try {
+            $composer = new Composer();
+            $composer->setMemoryLimit(1536);
+            $composer->setWorkDir($this->rootDir());
+
+            $tmpHomeDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . '.composer';
+
+            if (!is_dir($tmpHomeDir)) {
+                mkdir($tmpHomeDir, 0755);
+            }
+            $composer->setHomeDir($tmpHomeDir);
+
+            $update = $composer->update(true, true);
+        } catch (\Throwable $e) {
+            $this->error('Unable to determine dependencies for Winter CMS. ' . $e->getMessage());
+        }
+
+        $this->data['packagesInstalled'] = $update->getLockInstalledCount();
+    }
+
+    /**
+     * POST /api.php[endpoint=installDependencies]
+     *
+     * Installs the locked depencies from the `lockDependencies` call.
+     *
+     * @return void
+     */
+    public function postInstallDependencies()
+    {
+        set_time_limit(180);
+
+        try {
+            $composer = new Composer();
+            $composer->setMemoryLimit(1536);
+            $composer->setWorkDir($this->rootDir());
+
+            $tmpHomeDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . '.composer';
+
+            if (!is_dir($tmpHomeDir)) {
+                mkdir($tmpHomeDir, 0755);
+            }
+            $composer->setHomeDir($tmpHomeDir);
+
+            $install = $composer->install(true);
+        } catch (\Throwable $e) {
+            $this->error('Unable to determine dependencies for Winter CMS. ' . $e->getMessage());
+        }
+
+        $this->data['packagesInstalled'] = $install->getInstalledCount();
+    }
+
+    /**
+     * POST /api.php[endpoint=setupConfig]
+     *
+     * Rewrites the default configuration files with the values provided in the installer.
+     *
+     * @return void
+     */
+    public function postSetupConfig()
+    {
+        $this->bootFramework();
+
+        try {
+            $this->rewriter = new ConfigRewriter;
+
+            // config/app.php
+            $this->rewriter->toFile($this->rootDir('config/app.php'), [
+                'name' => $this->data['site']['name'],
+                'url' => $this->data['site']['url'],
+                'key' => $this->generateKey(),
+            ]);
+
+            // config/cms.php
+            $this->rewriter->toFile($this->rootDir('config/cms.php'), [
+                'backendUri' => '/' . $this->data['site']['backendUrl'],
+            ]);
+
+            // config/database.php
+            $dbConfig = $this->data['site']['database'];
+
+            if ($dbConfig['type'] === 'sqlite') {
+                $this->rewriter->toFile($this->rootDir('config/database.php'), [
+                    'default' => 'sqlite',
+                    'connections.sqlite.database' => $dbConfig['name'],
+                ]);
+            } else {
+                $this->rewriter->toFile($this->rootDir('config/database.php'), [
+                    'default' => $dbConfig['type'],
+                    'connections.' . $dbConfig['type'] . '.host' => $dbConfig['host'],
+                    'connections.' . $dbConfig['type'] . '.port' => $dbConfig['port'],
+                    'connections.' . $dbConfig['type'] . '.database' => $dbConfig['name'],
+                    'connections.' . $dbConfig['type'] . '.username' => $dbConfig['username'],
+                    'connections.' . $dbConfig['type'] . '.password' => $dbConfig['password'],
+                ]);
+            }
+        } catch (\Throwable $e) {
+            $this->error('Unable to write config. ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * POST /api.php[endpoint=runMigrations]
+     *
+     * Runs the migrations.
+     *
+     * @return void
+     */
+    public function postRunMigrations()
+    {
+        $this->bootFramework();
+
+        \Illuminate\Support\Facades\Artisan::call('october:up');
     }
 
     /**
@@ -270,7 +404,7 @@ class Api
 
     /**
      * Parses an incoming request for use in this API class.
-     * 
+     *
      * The method will be available in `$this->method`. Any request data will be available in `$this->data`.
      *
      * @return void
@@ -288,7 +422,7 @@ class Api
             $this->data = $_GET;
         } else {
             $json = file_get_contents('php://input');
-            
+
             if (empty($json)) {
                 $this->error('No JSON input detected', 400);
                 return;
@@ -394,7 +528,7 @@ class Api
 
     /**
      * Gets the root directory of the install path.
-     * 
+     *
      * @return string
      */
     protected function rootDir(string $suffix = '')
@@ -402,5 +536,84 @@ class Api
         $suffix = ltrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $suffix), '/\\');
 
         return dirname(dirname(dirname(__DIR__))) . (!empty($suffix) ? DIRECTORY_SEPARATOR . $suffix : '');
+    }
+
+    /**
+     * Creates a database capsule.
+     *
+     * @param array $dbConfig
+     * @return Capsule
+     */
+    protected function createCapsule(array $dbConfig)
+    {
+        $capsule = new Capsule();
+
+        switch ($dbConfig['type']) {
+            case 'sqlite':
+                $capsule->addConnection([
+                    'driver' => $dbConfig['type'],
+                    'database' => $dbConfig['database'],
+                    'prefix' => '',
+                ]);
+                break;
+            default:
+                $capsule->addConnection([
+                    'driver' => $dbConfig['type'],
+                    'host' => $dbConfig['host'] ?? null,
+                    'port' => $dbConfig['port'] ?? $this->getDefaultDbPort($dbConfig['type']),
+                    'database' => $dbConfig['name'],
+                    'username' => $dbConfig['username'] ?? '',
+                    'password' => $dbConfig['password'] ?? '',
+                    'charset' => 'utf8mb4',
+                    'collation' => 'utf8mb4_unicode_ci',
+                    'prefix' => '',
+                ]);
+        }
+
+        return $capsule;
+    }
+
+    /**
+     * Boots the Laravel framework for use in some installation steps.
+     *
+     * @return void
+     */
+    protected function bootFramework()
+    {
+        $autoloadFile = $this->rootDir('bootstrap/autoload.php');
+        if (!file_exists($autoloadFile)) {
+            $this->error('Unable to load bootstrap file for framework from "' . $autoloadFile . '".');
+            return;
+        }
+
+        require $autoloadFile;
+
+        $appFile = $this->rootDir('bootstrap/app.php');
+        if (!file_exists($appFile)) {
+            $this->error('Unable to load application initialization file for framework from "' . $appFile . '".');
+            return;
+        }
+
+        $app = require_once $appFile;
+        $kernel = $app->make('Illuminate\Contracts\Console\Kernel');
+        $kernel->bootstrap();
+    }
+
+    /**
+     * Generates a cryptographically-secure key for encryption.
+     *
+     * @return void
+     */
+    protected function generateKey()
+    {
+        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFHIJKLMNOPQRSTUVWXYZ0123456789';
+        $max = strlen($chars) - 1;
+        $key = '';
+
+        for ($i = 0; $i < 32; ++$i) {
+            $key .= substr($chars, random_int(0, $max), 1);
+        }
+
+        return $key;
     }
 }
