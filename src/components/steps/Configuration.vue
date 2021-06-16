@@ -479,6 +479,9 @@ export default {
       type: Object,
       required: true,
     },
+    installing: {
+      type: Boolean,
+    },
   },
   computed: {
     isActive() {
