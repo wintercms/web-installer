@@ -37,6 +37,15 @@ export default {
   mixins: [
     StepMixin,
   ],
+  props: {
+    site: {
+      type: Object,
+      required: true,
+    },
+    installing: {
+      type: Boolean,
+    },
+  },
   computed: {
     isActive() {
       return this.$store.getters['steps/isActive'](this.stepId);
