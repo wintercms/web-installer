@@ -377,9 +377,44 @@ class Api
      */
     public function postRunMigrations()
     {
-        $this->bootFramework();
+        try {
+            $this->bootFramework();
 
-        \Illuminate\Support\Facades\Artisan::call('october:up');
+            \Illuminate\Support\Facades\Artisan::call('october:up');
+        } catch (\Throwable $e) {
+            $this->error('Unable to run migrations. ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * POST /api.php[endpoint=createAdmin]
+     *
+     * Creates (or updates) the administrator account.
+     *
+     * @return void
+     */
+    public function postCreateAdmin()
+    {
+        try {
+            $this->bootFramework();
+
+            $admin = \Backend\Models\User::find(1);
+        } catch (\Throwable $e) {
+            $this->error('Unable to find administrator account. ' . $e->getMessage());
+        }
+
+        $admin->email = $this->data['site']['admin']['email'];
+        $admin->login = $this->data['site']['admin']['username'];
+        $admin->password = $this->data['site']['admin']['password'];
+        $admin->password_confirmation = $this->data['site']['admin']['password'];
+        $admin->first_name = $this->data['site']['admin']['firstName'];
+        $admin->last_name = $this->data['site']['admin']['lastName'];
+
+        try {
+            $admin->save();
+        } catch (\Throwable $e) {
+            $this->error('Unable to save administrator account. ' . $e->getMessage());
+        }
     }
 
     /**
