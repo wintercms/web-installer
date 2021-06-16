@@ -75,16 +75,21 @@ export default {
   methods: {
     async install() {
       this.begun = true;
+      this.install = true;
 
       // Disable ESLint rule checks for these lines, as the AirBnb standard doesn't seem to handle
       // async work very well.
 
       // eslint-disable-next-line
       for (const key of Object.keys(this.apiSteps)) {
-        console.log(key, this.apiSteps[key]);
         this.actioned.unshift(this.apiSteps[key]);
-        // eslint-disable-next-line
-        await this.installStep(key);
+        try {
+          // eslint-disable-next-line
+          await this.installStep(key);
+        } catch (e) {
+          this.setError(e);
+          break;
+        }
       }
 
       this.complete();
@@ -103,6 +108,10 @@ export default {
           },
         );
       });
+    },
+    setError(message) {
+      this.errored = true;
+      this.error = message;
     },
     complete() {
       this.$store.dispatch('steps/setStatus', {
