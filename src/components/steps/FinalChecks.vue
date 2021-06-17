@@ -189,10 +189,18 @@ p {
 }
 
 .checks {
+  margin: 1rem $layout-spacing-lg;
   display: flex;
   flex-direction: row;
-  flex-grow: 20;
-  flex-shrink: 1;
-  margin: 0 $layout-spacing-lg;
+  justify-content: center;
+  .check {
+    flex-grow: 0;
+    margin-right: $layout-spacing-sm;
+  }
+  @media (max-width: 1200px) {
+    & {
+      flex-direction: column;
+    }
+  }
 }
 </style>
