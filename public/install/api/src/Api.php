@@ -455,10 +455,10 @@ class Api
     {
         // Remove install files
         @unlink($this->workDir('winter.zip'));
-        @unlink($this->workDir('install.html'));
+        @unlink($this->rootDir('install.html'));
 
         // Remove install folders
-        $this->rimraf($this->workDir('install'));
+        $this->rimraf($this->rootDir('install'));
         $this->rimraf($this->tempDir('.composer'));
 
         // Move files from subdirectory into install folder
