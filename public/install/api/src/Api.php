@@ -471,6 +471,7 @@ class Api
         // Remove install files
         @unlink($this->workDir('winter.zip'));
         @unlink($this->rootDir('install.htm'));
+        @unlink($this->rootDir('install.zip'));
 
         // Remove install folders
         $this->rimraf($this->rootDir('install'));
