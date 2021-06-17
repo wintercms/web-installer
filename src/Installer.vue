@@ -212,4 +212,30 @@ body {
     }
   }
 }
+@media(screen and max-width: 576px) {
+  #installer-container.container {
+    padding-left: 0.6rem;
+    padding-right: 0.6rem;
+    #installer {
+      margin: .7em auto;
+      .step {
+        .step-content {
+          padding: 1.6rem 1rem;
+        }
+        .step-actions {
+          height: initial;
+          align-items: stretch;
+          line-height: initial;
+          justify-content: center;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          a.btn, button {
+            margin: 0 $layout-spacing $layout-spacing;
+          }
+        }
+      }
+    }
+  }
+}
 </style>
