@@ -159,6 +159,16 @@ class Api
     {
         $dbConfig = $this->data['site']['database'];
 
+        // Create a temporary SQLite database if necessary
+        try {
+            if (!is_file($this->rootDir('.temp.sqlite'))) {
+                touch($this->rootDir('.temp.sqlite'));
+            }
+        } catch (\Throwable $e) {
+            $this->data['exception'] = $e->getMessage();
+            $this->error('Unable to create a temporary SQLite database.');
+        }
+
         try {
             $capsule = $this->createCapsule($dbConfig);
             $connection = $capsule->getConnection();
@@ -266,6 +276,11 @@ class Api
 
         // Make artisan command-line tool executable
         chmod($this->workDir('artisan'), 0755);
+
+        // If using SQLite, move temp SQLite DB into position
+        if ($this->data['site']['database']['type'] === 'sqlite' && is_file($this->rootDir('.temp.sqlite'))) {
+            rename($this->rootDir('.temp.sqlite'), $this->workDir('storage/database.sqlite'));
+        }
     }
 
     /**
@@ -362,7 +377,7 @@ class Api
             if ($dbConfig['type'] === 'sqlite') {
                 $this->rewriter->toFile($this->workDir('config/database.php'), [
                     'default' => 'sqlite',
-                    'connections.sqlite.database' => $dbConfig['name'],
+                    'connections.sqlite.database' => 'storage/database.sqlite',
                 ]);
             } else {
                 $this->rewriter->toFile($this->workDir('config/database.php'), [
@@ -673,7 +688,7 @@ class Api
             case 'sqlite':
                 $capsule->addConnection([
                     'driver' => $dbConfig['type'],
-                    'database' => $dbConfig['database'],
+                    'database' => $this->rootDir('.temp.sqlite'),
                     'prefix' => '',
                 ]);
                 break;
