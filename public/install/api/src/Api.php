@@ -377,7 +377,6 @@ class Api
             if ($dbConfig['type'] === 'sqlite') {
                 $this->rewriter->toFile($this->workDir('config/database.php'), [
                     'default' => 'sqlite',
-                    'connections.sqlite.database' => 'storage/database.sqlite',
                 ]);
             } else {
                 $this->rewriter->toFile($this->workDir('config/database.php'), [
