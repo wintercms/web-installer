@@ -120,7 +120,11 @@ export default {
           if (responses[0].success) {
             this.checks.database.description = 'We were successfully able to connect to the database.';
           } else {
-            this.checks.database.description = 'We could not connect to the database. Please check your database settings.';
+            if (responses[0].data.dbNotEmpty) {
+              this.checks.database.description = 'The database you are installing to is not empty. Please delete all tables within this database before proceeding.';
+            } else {
+              this.checks.database.description = 'We could not connect to the database. Please check your database settings.';
+            }
           }
 
           if (responses[1].success) {
