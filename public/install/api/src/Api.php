@@ -476,6 +476,20 @@ class Api
         $this->rimraf($this->rootDir('install'));
         $this->rimraf($this->tempDir('.composer'));
 
+        // Remove core development files
+        $this->rimraf($this->workDir('.github'));
+        $this->rimraf($this->workDir('tests/fixtures'));
+        $this->rimraf($this->workDir('tests/js'));
+        $this->rimraf($this->workDir('tests/unit'));
+        @unlink($this->workDir('.gitconfig'));
+        @unlink($this->workDir('.gitattributes'));
+        @unlink($this->workDir('.jshintrc'));
+        @unlink($this->workDir('.babelrc'));
+        @unlink($this->workDir('package.json'));
+        @unlink($this->workDir('CHANGELOG.md'));
+        @unlink($this->workDir('phpunit.xml'));
+        @unlink($this->workDir('phpcs.xml'));
+
         // Move files from subdirectory into install folder
         $dir = new DirectoryIterator($this->workDir());
 
