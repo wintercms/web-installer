@@ -105,6 +105,7 @@ class Api
         $this->data = [
             'detected' => PHP_VERSION,
             'needed' => self::MIN_PHP_VERSION,
+            'installPath' => $this->rootDir(),
         ];
 
         if (!$hasVersion) {
@@ -157,6 +158,16 @@ class Api
     public function postCheckDatabase()
     {
         $dbConfig = $this->data['site']['database'];
+
+        // Create a temporary SQLite database if necessary
+        try {
+            if (!is_file($this->rootDir('.temp.sqlite'))) {
+                touch($this->rootDir('.temp.sqlite'));
+            }
+        } catch (\Throwable $e) {
+            $this->data['exception'] = $e->getMessage();
+            $this->error('Unable to create a temporary SQLite database.');
+        }
 
         try {
             $capsule = $this->createCapsule($dbConfig);
@@ -265,6 +276,11 @@ class Api
 
         // Make artisan command-line tool executable
         chmod($this->workDir('artisan'), 0755);
+
+        // If using SQLite, move temp SQLite DB into position
+        if ($this->data['site']['database']['type'] === 'sqlite' && is_file($this->rootDir('.temp.sqlite'))) {
+            rename($this->rootDir('.temp.sqlite'), $this->workDir('storage/database.sqlite'));
+        }
     }
 
     /**
@@ -361,7 +377,6 @@ class Api
             if ($dbConfig['type'] === 'sqlite') {
                 $this->rewriter->toFile($this->workDir('config/database.php'), [
                     'default' => 'sqlite',
-                    'connections.sqlite.database' => $dbConfig['name'],
                 ]);
             } else {
                 $this->rewriter->toFile($this->workDir('config/database.php'), [
@@ -455,7 +470,7 @@ class Api
     {
         // Remove install files
         @unlink($this->workDir('winter.zip'));
-        @unlink($this->rootDir('install.html'));
+        @unlink($this->rootDir('install.htm'));
 
         // Remove install folders
         $this->rimraf($this->rootDir('install'));
@@ -672,7 +687,7 @@ class Api
             case 'sqlite':
                 $capsule->addConnection([
                     'driver' => $dbConfig['type'],
-                    'database' => $dbConfig['database'],
+                    'database' => $this->rootDir('.temp.sqlite'),
                     'prefix' => '',
                 ]);
                 break;

@@ -231,31 +231,12 @@
 
             <div class="columns" v-else>
               <div class="column">
-                <ValidationProvider
-                  name="SQLite Database Path"
-                  mode="eager"
-                  rules="required"
-                  :immediate="false"
-                  v-slot="{ dirty, invalid, errors }"
-                  slim
-                >
-                  <div class="form-group" :class="{ 'has-error': dirty && invalid }">
-                    <label class="form-label" for="databaseName">SQLite Database Path</label>
-                    <input
-                      type="text"
-                      class="form-input"
-                      name="databaseName"
-                      placeholder="Enter the path to the SQLite database"
-                      v-model="site.database.name"
-                      tabindex="9"
-                      :disabled="installing"
-                    >
-                    <transition name="fade">
-                      <div v-if="dirty && errors.length" class="form-error" v-text="errors[0]">
-                      </div>
-                    </transition>
-                  </div>
-                </ValidationProvider>
+                <p class="text-sm">
+                  Your SQLite database will be set up in the default path for Winter CMS,
+                  which for your installation will be:
+                  <br>
+                  <strong v-text="installation.installPath + '/storage/database.sqlite'" />
+                </p>
               </div>
             </div>
           </Tab>
@@ -479,13 +460,17 @@ export default {
       type: Object,
       required: true,
     },
-    installing: {
-      type: Boolean,
+    installation: {
+      type: Object,
+      required: true,
     },
   },
   computed: {
     isActive() {
       return this.$store.getters['steps/isActive'](this.stepId);
+    },
+    installing() {
+      return this.installation.installing;
     },
   },
   data() {
@@ -522,3 +507,9 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.text-sm {
+  font-size: $font-size-sm;
+}
+</style>
