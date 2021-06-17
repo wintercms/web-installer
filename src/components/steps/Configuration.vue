@@ -68,7 +68,7 @@
                 </ValidationProvider>
 
                 <ValidationProvider
-                  name="Backend URL Keyword"
+                  name="Backend Path"
                   mode="eager"
                   rules="backendUrl"
                   :immediate="false"
@@ -76,16 +76,16 @@
                   slim
                 >
                   <div class="form-group" :class="{ 'has-error': dirty && invalid }">
-                    <label class="form-label" for="backendUrl">Backend URL Keyword</label>
+                    <label class="form-label" for="backendUrl">Backend Path</label>
                     <small class="help">
-                      Provide the keyword that will be used for the URL to the Backend. By default,
-                      this is <strong>backend</strong>.
+                      Provide the path that will be used to access the Backend. By default,
+                      this is <strong>backend</strong> (i.e. Backend would be accessible at https://example.com/backend).
                     </small>
                     <input
                       type="text"
                       class="form-input"
                       name="backendUrl"
-                      placeholder="Enter your backend URL keyword"
+                      placeholder="Enter your backend path"
                       v-model="site.backendUrl"
                       tabindex="3"
                       :disabled="installing"

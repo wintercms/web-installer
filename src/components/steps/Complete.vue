@@ -5,7 +5,7 @@
 
       <h3>Winter CMS is now installed!</h3>
 
-      <p>Your new installation is ready to go. We hope you enjoy using Winter CMS.</p>
+      <p>Your new installation is ready to go. We hope you enjoy using Winter CMS!</p>
     </div>
     <div class="step-actions">
       <Click

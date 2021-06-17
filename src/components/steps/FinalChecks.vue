@@ -3,7 +3,7 @@
     <div class="step-content">
       <h4>Last checks.</h4>
 
-      <p>To ensure that Winter CMS will install and run with your configuration, we're doing some
+      <p>To ensure that Winter CMS can install and run with your configuration, we're doing some
         final checks.</p>
     </div>
     <div class="checks">

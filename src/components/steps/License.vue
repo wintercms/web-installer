@@ -34,7 +34,7 @@ SOFTWARE.
 
     <div class="step-actions">
       <Click
-        label="I accept, let's do this"
+        label="I accept, let's do this!"
         flag="primary"
         @press="complete"
       />
