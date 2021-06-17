@@ -76,7 +76,7 @@ export default {
       },
       site: {
         name: '',
-        url: '',
+        url: this.defaultUrl(),
         backendUrl: 'backend',
         database: {
           type: 'mysql',
@@ -119,6 +119,12 @@ export default {
   methods: {
     isStepActive(id) {
       return this.$store.getters['steps/isActive'](id);
+    },
+    defaultUrl() {
+      return window.location.protocol
+        + '//'
+        + window.location.host
+        + (window.location.pathname.replace('/install.htm', ''));
     },
   },
 };
