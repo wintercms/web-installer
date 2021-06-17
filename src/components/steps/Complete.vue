@@ -98,7 +98,7 @@ export default {
   }
 }
 
-.step-actions button:first-child {
+.step-actions .btn:first-child {
   margin-right: $layout-spacing-sm;
 }
 
