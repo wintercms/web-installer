@@ -12,10 +12,10 @@ For developers, we recommend the following methods:
 ## Installation
 
 1. Prepare an empty directory on the web server that will host your Winter CMS installation. It can be a main domain, sub-domain or subfolder.
-2. [Download the latest version](https://github.com/wintercms/web-installer/archive/install.zip) of the Winter CMS Web Installer into this folder.
+2. [Download the "install.zip" file](https://github.com/wintercms/web-installer/releases/latest) from the latest release of the Winter CMS Web Installer into this folder.
 3. Unzip the downloaded ZIP file.
 4. Grant write permissions to all files and folders that were extracted.
-5. In your web browser, navigate to the URL pointing to that folder, and include `/install.htm` at the end of the URL.
+5. In your web browser, navigate to the URL pointing to that folder, and include `/install.html` at the end of the URL.
 6. Follow the instructions given in the installer.
 
 > **Note:** The web installer will install a production version of Winter CMS that does not contain files necessary for development of Winter CMS itself, like unit tests or Composer files. Should you require these, please use one of the other installation methods.

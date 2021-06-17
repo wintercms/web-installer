@@ -124,7 +124,7 @@ export default {
       return window.location.protocol
         + '//'
         + window.location.host
-        + (window.location.pathname.replace('/install.htm', ''));
+        + (window.location.pathname.replace('/install.html', ''));
     },
   },
 };
