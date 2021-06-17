@@ -139,7 +139,6 @@ body {
 }
 
 body {
-  display: flex;
   background: url('./assets/img/background.jpg') no-repeat center center fixed;
   background-size: cover;
   background-repeat: no-repeat;
@@ -154,6 +153,7 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  min-height: 100%;
 
   #installer {
     display: flex;
@@ -161,14 +161,13 @@ body {
     width: 100%;
     background: $body-bg;
     border-radius: $border-radius;
-    min-height: 600px;
     box-shadow: 0px 12px 6px rgba(0, 0, 0, 0.18);
     margin: 2em auto;
 
     .content {
       position: relative;
       height: 100%;
-      width: 100%;
+      width: calc(100vw - 250px /* sidebar width */ - (1.6rem /* container l+r padding */ * 2));
     }
   }
 }
