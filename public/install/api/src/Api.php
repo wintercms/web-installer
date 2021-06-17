@@ -60,6 +60,7 @@ class Api
         // Disable display errors to prevent corruption of JSON responses
         ini_set('display_errors', 'Off');
 
+        $this->setExceptionHandler();
         $this->parseRequest();
 
         $method = $this->getRequestedMethod();
@@ -755,5 +756,29 @@ class Api
         }
 
         @rmdir($path);
+    }
+
+    /**
+     * Register a custom exception handler for the API.
+     *
+     * @return void
+     */
+    protected function setExceptionHandler()
+    {
+        set_exception_handler([$this, 'handleException']);
+    }
+
+    /**
+     * Handle an uncaught PHP exception.
+     *
+     * @param \Exception $exception
+     * @return void
+     */
+    protected function handleError($exception)
+    {
+        $this->data['code'] = $exception->getCode();
+        $this->data['file'] = $exception->getFile();
+        $this->data['line'] = $exception->getLine();
+        $this->error($exception->getMessage());
     }
 }
