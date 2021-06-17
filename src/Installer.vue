@@ -139,10 +139,14 @@ body {
 }
 
 body {
-  background-image: url('./assets/img/background.jpg');
+  display: flex;
+  background: url('./assets/img/background.jpg') no-repeat center center fixed;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 #installer-container {
@@ -150,18 +154,16 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100%;
 
   #installer {
     display: flex;
     flex-direction: row;
     width: 100%;
-    height: 90%;
-    max-height: 600px;
-
     background: $body-bg;
     border-radius: $border-radius;
+    min-height: 600px;
     box-shadow: 0px 12px 6px rgba(0, 0, 0, 0.18);
+    margin: 2em auto;
 
     .content {
       position: relative;

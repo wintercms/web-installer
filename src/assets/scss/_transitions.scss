@@ -8,6 +8,8 @@
 
 .fade-enter, .fade-leave-to {
   opacity: 0;
+  height: 0;
+  visibility: hidden;
 }
 
 @keyframes showTick {
