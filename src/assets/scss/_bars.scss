@@ -24,7 +24,7 @@
     position: relative;
     text-align: center;
     width: 0;
-    transition: width 350ms ease;
+    transition: width 350ms ease, background-color 350ms ease;
 
     &:first-child {
       border-bottom-left-radius: $border-radius;
@@ -35,5 +35,9 @@
       border-top-right-radius: $border-radius;
       flex-shrink: 1;
     }
+  }
+
+  &.bar-error .bar-item {
+    background: $error-color;
   }
 }

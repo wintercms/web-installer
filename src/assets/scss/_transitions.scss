@@ -9,3 +9,23 @@
 .fade-enter, .fade-leave-to {
   opacity: 0;
 }
+
+@keyframes showTick {
+  0% {
+    top: 120%;
+    opacity: 0;
+  }
+
+  100% {
+    top: 50%;
+    opacity: 1;
+  }
+}
+
+.install-step-item {
+  transition: all 500ms ease;
+}
+
+.install-step-enter, .install-step-leave-to {
+  opacity: 0;
+}

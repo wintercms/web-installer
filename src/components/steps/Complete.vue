@@ -103,16 +103,4 @@ export default {
 p {
   margin-bottom: 0.6rem;
 }
-
-@keyframes showTick {
-  0% {
-    top: 120%;
-    opacity: 0;
-  }
-
-  100% {
-    top: 50%;
-    opacity: 1;
-  }
-}
 </style>
