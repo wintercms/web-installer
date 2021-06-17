@@ -197,9 +197,12 @@ p {
 
 .checks {
   display: flex;
-  flex-direction: row;
-  flex-grow: 20;
-  flex-shrink: 1;
   margin: 0 $layout-spacing-lg;
+
+    @media(screen and max-width: 1200px) {
+      & {
+          display: block;
+      }
+    }
 }
 </style>

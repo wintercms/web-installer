@@ -1,11 +1,17 @@
 <template>
   <div class="check" :class="status">
-    <div class="name" v-text="name"></div>
-
-    <div class="loading" v-if="status === 'loading'"></div>
-    <div class="icon" v-else></div>
-
-    <div class="description" v-text="description"></div>
+    <div class="mobile-icon">
+      <div class="loading" v-if="status === 'loading'"></div>
+      <div class="icon" v-else></div>
+    </div>
+    <div class="check-row">
+      <div class="name" v-text="name"></div>
+        <div class="desktop-icon">
+          <div class="loading" v-if="status === 'loading'"></div>
+          <div class="icon" v-else></div>
+        </div>
+      <div class="description" v-text="description"></div>
+    </div>
   </div>
 </template>
 
@@ -31,34 +37,48 @@ export default {
 
 <style lang="scss" scoped>
 .check {
+  width: 25%;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
   flex-shrink: 1;
   margin-right: $layout-spacing-sm;
-
-  width: 25%;
+  border: 1px solid $primary-color;
+  border-top: none;
+  border-radius: $border-radius;
 
   .name {
     padding: 8px $layout-spacing-sm;
-
-    border-radius: $border-radius;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
     background: $primary-color;
     text-align: center;
     color: $light-color;
     flex-grow: 0;
     flex-shrink: 0;
+    border-top: 1px solid $primary-color;
+    border-top-left-radius: $border-radius;
+    border-top-right-radius: $border-radius;
   }
 
   .loading,
   .icon {
-    border-left: 1px solid $primary-color;
-    border-right: 1px solid $primary-color;
     height: 100px;
     flex-grow: 0;
     flex-shrink: 0;
+
+    &:after {
+      position: absolute;
+      top: 25%;
+      left: 50%;
+      width: 70px;
+      height: 70px;
+      margin-left: -35px;
+      border-radius: 50%;
+      color: $light-color;
+      text-align: center;
+      line-height: 70px;
+      font-weight: 700;
+      font-size: 3em;
+    }
   }
 
   .loading {
@@ -79,101 +99,132 @@ export default {
       height: $unit-16;
       left: 50%;
       margin-left: -$unit-8;
-      margin-top: -$unit-6;
       opacity: 1;
       padding: 0;
       position: absolute;
-      top: 50%;
+      top: 5%;
       width: $unit-16;
       z-index: $zindex-0;
     }
   }
 
   .description {
-    border: 1px solid $primary-color;
     border-top: none;
     padding: $layout-spacing-sm;
-    border-radius: $border-radius;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
     flex-grow: 1;
     flex-shrink: 1;
     text-align: center;
+    word-break: break-word;
   }
 
   &.success {
+    border-color: $success-color;
     .name {
       background: $success-color;
-    }
-
-    .loading,
-    .icon {
       border-color: $success-color;
     }
-
     .icon {
       position: relative;
-
       &::after {
         content: '✔';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 70px;
-        height: 70px;
-        margin-top: -25px;
-        margin-left: -35px;
-
         background: $success-color;
-        border-radius: 50%;
         color: $light-color;
-        text-align: center;
-        line-height: 70px;
-        font-weight: 700;
-        font-size: 3em;
       }
-    }
-
-    .description {
-      border-color: $success-color;
     }
   }
 
   &.error {
+    border-color: $error-color;
     .name {
       background: $error-color;
-    }
-
-    .loading,
-    .icon {
       border-color: $error-color;
     }
-
     .icon {
       position: relative;
-
       &::after {
         content: '✘';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 70px;
-        height: 70px;
-        margin-top: -25px;
-        margin-left: -35px;
-
         background: $error-color;
-        border-radius: 50%;
         color: $light-color;
-        text-align: center;
-        line-height: 70px;
-        font-weight: 700;
-        font-size: 3em;
       }
     }
+  }
 
-    .description {
-      border-color: $error-color;
+  & .mobile-icon {
+    display: none;
+  }
+
+  @media(screen and max-width: 1200px) {
+    & {
+      width: 100%;
+      flex-direction: row;
+      border: none;
+
+      .check-row {
+        margin-left: 3em;
+
+        &:not(:last-child) {
+          margin-bottom: 2em;
+        }
+      }
+
+      .desktop-icon {
+        display: none;
+      }
+
+      .mobile-icon {
+        display: block;
+      }
+
+      .loading,
+      .icon {
+        border: none;
+        &:after {
+          top: 13%;
+        }
+      }
+
+      .name {
+        color: $primary-color;
+        padding: 0 $layout-spacing-sm;
+        text-align: left;
+        flex-grow: 0;
+        flex-shrink: 0;
+        border: none;
+      }
+
+      .description {
+        padding: 0 $layout-spacing-sm $layout-spacing-sm;
+        flex-grow: 1;
+        flex-shrink: 1;
+        text-align: left;
+        border: none;
+      }
+
+      .name {
+        padding: 0 $layout-spacing-sm;
+        flex-grow: 1;
+        flex-shrink: 1;
+        text-align: left;
+        background: transparent;
+      }
+
+      &.success, &.error {
+        .name {
+          background: transparent;
+        }
+      }
+
+      &.success {
+        .name {
+          color: $success-color;
+        }
+      }
+
+      &.error {
+        .name {
+          color: $error-color;
+        }
+      }
     }
   }
 }
