@@ -171,4 +171,45 @@ body {
     }
   }
 }
+
+@media (screen and max-width: 768px) {
+  #installer-container {
+    #installer {
+      flex-direction: column;
+      #sidebar {
+        width: 100%;
+        flex-direction: row;
+        border-top-right-radius: $border-radius;
+        border-bottom-left-radius: 0;
+        .logo {
+          margin: 0 auto;
+          width: 300px;
+          padding: 1.6rem 20px 0;
+        }
+        .step-links {
+          flex-direction: row;
+          display: flex;
+          flex-wrap: nowrap;
+          align-content: center;
+          align-items: center;
+          overflow-x: scroll;
+          padding-top: 1rem;
+          scroll-behavior: smooth;
+          .step-link {
+            white-space: nowrap;
+            &.complete {
+              padding-right: 2.4rem;
+            }
+            &.active {
+              box-shadow: 0px -5px 15px 0px rgb(0 0 0 / 8%);
+            }
+          }
+        }
+      }
+      .content {
+        width: auto;
+      }
+    }
+  }
+}
 </style>
