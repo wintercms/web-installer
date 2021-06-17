@@ -82,7 +82,7 @@ p {
 .license {
   flex-grow: 2;
   flex-shrink: 1;
-  margin: 0 $layout-spacing;
+  margin: 0 $layout-spacing $layout-spacing;
   padding: $layout-spacing;
   overflow: auto;
 
