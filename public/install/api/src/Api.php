@@ -473,6 +473,9 @@ class Api
 
             rename($item->getPathname(), $this->rootDir($relativePath));
         }
+
+        // Remove work directory
+        rmdir($this->workDir());
     }
 
     /**
