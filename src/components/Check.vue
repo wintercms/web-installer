@@ -227,6 +227,22 @@ export default {
       }
     }
   }
+
+  @media(screen and max-width: 576px) {
+    .check-row {
+      margin-left: 0;
+    }
+    .loading,
+    .icon {
+      display: none;
+    }
+    .name {
+      padding: 0;
+    }
+    .description {
+      padding: 0 0 0.8rem;
+    }
+  }
 }
 
 @keyframes loading {

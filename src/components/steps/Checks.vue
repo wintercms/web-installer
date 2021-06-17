@@ -207,10 +207,15 @@ p {
   display: flex;
   margin: 0 $layout-spacing-lg;
 
-    @media(screen and max-width: 1200px) {
-      & {
-          display: block;
-      }
+  @media(screen and max-width: 1200px) {
+    & {
+        display: block;
     }
+  }
+  @media(screen and max-width: 576px) {
+    & {
+      margin: 0 1rem;
+    }
+  }
 }
 </style>

@@ -202,5 +202,10 @@ p {
       flex-direction: column;
     }
   }
+  @media(screen and max-width: 576px) {
+    & {
+      margin: 0 1rem;
+    }
+  }
 }
 </style>
