@@ -479,13 +479,17 @@ export default {
       type: Object,
       required: true,
     },
-    installing: {
-      type: Boolean,
+    installation: {
+      type: Object,
+      required: true,
     },
   },
   computed: {
     isActive() {
       return this.$store.getters['steps/isActive'](this.stepId);
+    },
+    installing() {
+      return this.installation.installing;
     },
   },
   data() {

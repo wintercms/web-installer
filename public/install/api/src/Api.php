@@ -105,6 +105,7 @@ class Api
         $this->data = [
             'detected' => PHP_VERSION,
             'needed' => self::MIN_PHP_VERSION,
+            'installPath' => $this->rootDir(),
         ];
 
         if (!$hasVersion) {

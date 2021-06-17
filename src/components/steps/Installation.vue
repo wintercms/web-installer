@@ -53,8 +53,9 @@ export default {
       type: Object,
       required: true,
     },
-    installing: {
-      type: Boolean,
+    installation: {
+      type: Object,
+      required: true,
     },
   },
   computed: {
@@ -95,7 +96,7 @@ export default {
   methods: {
     async install() {
       this.begun = true;
-      this.install = true;
+      this.installation.installing = true;
 
       // Disable ESLint rule checks for these lines, as the AirBnb standard doesn't seem to handle
       // async work very well.
