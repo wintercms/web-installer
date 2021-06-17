@@ -3,7 +3,7 @@
     <div class="step-content">
       <h4>We're now running a couple of checks.</h4>
 
-      <p>To ensure that Winter CMS will install and run on your web server, we're just doing
+      <p>To ensure that Winter CMS can install and run on your web server, we're just doing
         a couple of checks of your PHP and server configuration.</p>
     </div>
     <div class="checks">
@@ -49,6 +49,12 @@ export default {
   components: {
     Click,
     Check,
+  },
+  props: {
+    installation: {
+      type: Object,
+      required: true,
+    },
   },
   computed: {
     buttonLabel() {
@@ -118,10 +124,12 @@ export default {
           this.checks.phpVersion.status = responses[1].success;
           this.checks.phpExtensions.status = responses[2].success;
 
+          this.installation.installPath = responses[1].data.installPath || null;
+
           if (responses[0].success) {
-            this.checks.api.description = 'We were successfully able to connect to the Winter CMS Marketplace API.';
+            this.checks.api.description = 'Your server is able to connect to the Winter CMS Marketplace API.';
           } else {
-            this.checks.api.description = 'We could not connect to the Winter CMS Marketplace API.';
+            this.checks.api.description = 'Your server could not connect to the Winter CMS Marketplace API.';
           }
 
           if (responses[1].success) {
@@ -131,7 +139,7 @@ export default {
           }
 
           if (responses[2].success) {
-            this.checks.phpExtensions.description = 'All necessary PHP extensions required to run Winter CMS are installed on your server.';
+            this.checks.phpExtensions.description = 'All the necessary PHP extensions required to run Winter CMS are installed on your server.';
           } else {
             this.checks.phpExtensions.description = `You are missing the "${responses[2].data.extension}", which is required in order to run Winter CMS. Please install it on your server and re-run the tests.`;
           }

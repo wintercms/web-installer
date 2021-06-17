@@ -57,6 +57,10 @@ class Api
      */
     public function request()
     {
+        // Disable display errors to prevent corruption of JSON responses
+        ini_set('display_errors', 'Off');
+
+        $this->setExceptionHandler();
         $this->parseRequest();
 
         $method = $this->getRequestedMethod();
@@ -101,6 +105,7 @@ class Api
         $this->data = [
             'detected' => PHP_VERSION,
             'needed' => self::MIN_PHP_VERSION,
+            'installPath' => $this->rootDir(),
         ];
 
         if (!$hasVersion) {
@@ -154,6 +159,16 @@ class Api
     {
         $dbConfig = $this->data['site']['database'];
 
+        // Create a temporary SQLite database if necessary
+        try {
+            if (!is_file($this->rootDir('.temp.sqlite'))) {
+                touch($this->rootDir('.temp.sqlite'));
+            }
+        } catch (\Throwable $e) {
+            $this->data['exception'] = $e->getMessage();
+            $this->error('Unable to create a temporary SQLite database.');
+        }
+
         try {
             $capsule = $this->createCapsule($dbConfig);
             $connection = $capsule->getConnection();
@@ -195,7 +210,13 @@ class Api
      */
     public function postDownloadWinter()
     {
-        $winterZip = $this->rootDir('winter.zip');
+        if (!is_dir($this->workDir())) {
+            if (!@mkdir($this->workDir(), 0755, true)) {
+                $this->error('Unable to create a work directory for installation');
+            }
+        }
+
+        $winterZip = $this->workDir('winter.zip');
 
         if (!file_exists($winterZip)) {
             try {
@@ -218,7 +239,7 @@ class Api
      */
     public function postExtractWinter()
     {
-        $winterZip = $this->rootDir('winter.zip');
+        $winterZip = $this->workDir('winter.zip');
 
         if (!file_exists($winterZip)) {
             $this->error('Winter CMS Zip file not found.');
@@ -232,29 +253,34 @@ class Api
             $this->error('Unable to extract Winter CMS. ' . $e->getMessage());
         }
 
-        $zip->extractTo($this->rootDir());
+        $zip->extractTo($this->workDir());
 
         if (!empty(self::ARCHIVE_SUBFOLDER)) {
             // Move files from subdirectory into install folder
-            $dir = new DirectoryIterator($this->rootDir(self::ARCHIVE_SUBFOLDER));
+            $dir = new DirectoryIterator($this->workDir(self::ARCHIVE_SUBFOLDER));
 
             foreach ($dir as $item) {
                 if ($item->isDot()) {
                     continue;
                 }
 
-                $relativePath = str_replace($this->rootDir(self::ARCHIVE_SUBFOLDER), '', $item->getPathname());
+                $relativePath = str_replace($this->workDir(self::ARCHIVE_SUBFOLDER), '', $item->getPathname());
 
-                rename($item->getPathname(), $this->rootDir($relativePath));
+                rename($item->getPathname(), $this->workDir($relativePath));
             }
         }
 
         // Clean up
         $zip->close();
-        rmdir($this->rootDir(self::ARCHIVE_SUBFOLDER));
+        rmdir($this->workDir(self::ARCHIVE_SUBFOLDER));
 
         // Make artisan command-line tool executable
-        chmod($this->rootDir('artisan'), 0755);
+        chmod($this->workDir('artisan'), 0755);
+
+        // If using SQLite, move temp SQLite DB into position
+        if ($this->data['site']['database']['type'] === 'sqlite' && is_file($this->rootDir('.temp.sqlite'))) {
+            rename($this->rootDir('.temp.sqlite'), $this->workDir('storage/database.sqlite'));
+        }
     }
 
     /**
@@ -271,9 +297,9 @@ class Api
         try {
             $composer = new Composer();
             $composer->setMemoryLimit(1536);
-            $composer->setWorkDir($this->rootDir());
+            $composer->setWorkDir($this->workDir());
 
-            $tmpHomeDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . '.composer';
+            $tmpHomeDir = $this->tempDir('.composer');
 
             if (!is_dir($tmpHomeDir)) {
                 mkdir($tmpHomeDir, 0755);
@@ -302,9 +328,9 @@ class Api
         try {
             $composer = new Composer();
             $composer->setMemoryLimit(1536);
-            $composer->setWorkDir($this->rootDir());
+            $composer->setWorkDir($this->workDir());
 
-            $tmpHomeDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . '.composer';
+            $tmpHomeDir = $this->tempDir('.composer');
 
             if (!is_dir($tmpHomeDir)) {
                 mkdir($tmpHomeDir, 0755);
@@ -334,14 +360,14 @@ class Api
             $this->rewriter = new ConfigRewriter;
 
             // config/app.php
-            $this->rewriter->toFile($this->rootDir('config/app.php'), [
+            $this->rewriter->toFile($this->workDir('config/app.php'), [
                 'name' => $this->data['site']['name'],
                 'url' => $this->data['site']['url'],
                 'key' => $this->generateKey(),
             ]);
 
             // config/cms.php
-            $this->rewriter->toFile($this->rootDir('config/cms.php'), [
+            $this->rewriter->toFile($this->workDir('config/cms.php'), [
                 'backendUri' => '/' . $this->data['site']['backendUrl'],
             ]);
 
@@ -349,12 +375,11 @@ class Api
             $dbConfig = $this->data['site']['database'];
 
             if ($dbConfig['type'] === 'sqlite') {
-                $this->rewriter->toFile($this->rootDir('config/database.php'), [
+                $this->rewriter->toFile($this->workDir('config/database.php'), [
                     'default' => 'sqlite',
-                    'connections.sqlite.database' => $dbConfig['name'],
                 ]);
             } else {
-                $this->rewriter->toFile($this->rootDir('config/database.php'), [
+                $this->rewriter->toFile($this->workDir('config/database.php'), [
                     'default' => $dbConfig['type'],
                     'connections.' . $dbConfig['type'] . '.host' => $dbConfig['host'],
                     'connections.' . $dbConfig['type'] . '.port' => $dbConfig['port'],
@@ -436,17 +461,51 @@ class Api
     /**
      * POST /api.php[endpoint=cleanUp]
      *
-     * Cleans up and removes the installer and Composer cache.
+     * Cleans up and removes the installer and Composer cache, removes core development files, and then moves
+     * Winter CMS files into position.
      *
      * @return void
      */
     public function postCleanUp()
     {
-        @unlink($this->rootDir('winter.zip'));
-        @unlink($this->rootDir('install.html'));
+        // Remove install files
+        @unlink($this->workDir('winter.zip'));
+        @unlink($this->rootDir('install.htm'));
+        @unlink($this->rootDir('install.zip'));
 
+        // Remove install folders
         $this->rimraf($this->rootDir('install'));
-        $this->rimraf(sys_get_temp_dir() . DIRECTORY_SEPARATOR . '.composer');
+        $this->rimraf($this->tempDir('.composer'));
+
+        // Remove core development files
+        $this->rimraf($this->workDir('.github'));
+        $this->rimraf($this->workDir('tests/fixtures'));
+        $this->rimraf($this->workDir('tests/js'));
+        $this->rimraf($this->workDir('tests/unit'));
+        @unlink($this->workDir('.gitconfig'));
+        @unlink($this->workDir('.gitattributes'));
+        @unlink($this->workDir('.jshintrc'));
+        @unlink($this->workDir('.babelrc'));
+        @unlink($this->workDir('package.json'));
+        @unlink($this->workDir('CHANGELOG.md'));
+        @unlink($this->workDir('phpunit.xml'));
+        @unlink($this->workDir('phpcs.xml'));
+
+        // Move files from subdirectory into install folder
+        $dir = new DirectoryIterator($this->workDir());
+
+        foreach ($dir as $item) {
+            if ($item->isDot()) {
+                continue;
+            }
+
+            $relativePath = str_replace($this->workDir(), '', $item->getPathname());
+
+            rename($item->getPathname(), $this->rootDir($relativePath));
+        }
+
+        // Remove work directory
+        rmdir($this->workDir());
     }
 
     /**
@@ -586,6 +645,30 @@ class Api
     }
 
     /**
+     * Gets the working directory.
+     *
+     * @return string
+     */
+    protected function workDir(string $suffix = '')
+    {
+        $suffix = ltrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $suffix), '/\\');
+
+        return $this->rootDir('.wintercms' . (!empty($suffix) ? DIRECTORY_SEPARATOR . $suffix : ''));
+    }
+
+    /**
+     * Gets the temp directory.
+     *
+     * @return string
+     */
+    protected function tempDir(string $suffix = '')
+    {
+        $suffix = ltrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $suffix), '/\\');
+
+        return rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . (!empty($suffix) ? DIRECTORY_SEPARATOR . $suffix : '');
+    }
+
+    /**
      * Determines the default port number for the given database type.
      *
      * @param string $type
@@ -619,7 +702,7 @@ class Api
             case 'sqlite':
                 $capsule->addConnection([
                     'driver' => $dbConfig['type'],
-                    'database' => $dbConfig['database'],
+                    'database' => $this->rootDir('.temp.sqlite'),
                     'prefix' => '',
                 ]);
                 break;
@@ -647,7 +730,7 @@ class Api
      */
     protected function bootFramework()
     {
-        $autoloadFile = $this->rootDir('bootstrap/autoload.php');
+        $autoloadFile = $this->workDir('bootstrap/autoload.php');
         if (!file_exists($autoloadFile)) {
             $this->error('Unable to load bootstrap file for framework from "' . $autoloadFile . '".');
             return;
@@ -655,7 +738,7 @@ class Api
 
         require $autoloadFile;
 
-        $appFile = $this->rootDir('bootstrap/app.php');
+        $appFile = $this->workDir('bootstrap/app.php');
         if (!file_exists($appFile)) {
             $this->error('Unable to load application initialization file for framework from "' . $appFile . '".');
             return;
@@ -706,5 +789,29 @@ class Api
         }
 
         @rmdir($path);
+    }
+
+    /**
+     * Register a custom exception handler for the API.
+     *
+     * @return void
+     */
+    protected function setExceptionHandler()
+    {
+        set_exception_handler([$this, 'handleException']);
+    }
+
+    /**
+     * Handle an uncaught PHP exception.
+     *
+     * @param \Exception $exception
+     * @return void
+     */
+    public function handleException($exception)
+    {
+        $this->data['code'] = $exception->getCode();
+        $this->data['file'] = $exception->getFile();
+        $this->data['line'] = $exception->getLine();
+        $this->error($exception->getMessage());
     }
 }

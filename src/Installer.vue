@@ -12,6 +12,7 @@
           <Checks
             v-show="isStepActive('checks')"
             :key="'checks'"
+            :installation="installation"
           />
           <License
             v-show="isStepActive('license')"
@@ -21,7 +22,7 @@
             v-show="isStepActive('config')"
             :key="'config'"
             :site="site"
-            :installing="installing"
+            :installation="installation"
           />
           <FinalChecks
             v-show="isStepActive('finalChecks')"
@@ -32,7 +33,7 @@
             v-show="isStepActive('installation')"
             :key="'installation'"
             :site="site"
-            :installing="installing"
+            :installation="installation"
           />
           <Complete
             v-show="isStepActive('complete')"
@@ -69,10 +70,13 @@ export default {
   },
   data() {
     return {
-      installing: false,
+      installation: {
+        installing: false,
+        installPath: null,
+      },
       site: {
         name: '',
-        url: '',
+        url: this.defaultUrl(),
         backendUrl: 'backend',
         database: {
           type: 'mysql',
@@ -115,6 +119,12 @@ export default {
   methods: {
     isStepActive(id) {
       return this.$store.getters['steps/isActive'](id);
+    },
+    defaultUrl() {
+      return window.location.protocol
+        + '//'
+        + window.location.host
+        + (window.location.pathname.replace('/install.htm', ''));
     },
   },
 };

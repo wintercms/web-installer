@@ -1,13 +1,16 @@
 <template>
   <div class="step text-center">
     <div class="step-content">
-      <div class="circle-logo"></div>
+      <transition name="fade" mode="out-in">
+        <div class="circle-logo" v-if="!errored"></div>
+        <div class="danger-logo" v-else></div>
+      </transition>
 
       <h3>Installing Winter CMS</h3>
 
       <p>This process may take a minute or two. Please do not close the window.</p>
 
-      <div class="bar bar-lg">
+      <div class="bar bar-lg" :class="{ 'bar-error': errored }">
         <div
           class="bar-item"
           role="progressbar"
@@ -15,16 +18,24 @@
         ></div>
       </div>
 
-      <div class="install-steps">
-        <transition-group name="install-step" tag="ul">
-          <li
-            v-for="action in actioned"
-            :key="action"
-            class="install-step-item"
-            v-text="action"
-          ></li>
-        </transition-group>
-      </div>
+      <transition name="fade" mode="out-in">
+        <div class="install-steps" v-if="!errored">
+          <transition-group name="install-step" tag="ul">
+            <li
+              v-for="action in actioned"
+              :key="action"
+              class="install-step-item"
+              v-text="action"
+            ></li>
+          </transition-group>
+        </div>
+        <div class="error" v-else>
+          <p>
+            Sorry, but an error has occurred while trying to install Winter CMS.
+          </p>
+          <p><strong v-text="error"></strong></p>
+        </div>
+      </transition>
     </div>
   </div>
 </template>
@@ -42,8 +53,9 @@ export default {
       type: Object,
       required: true,
     },
-    installing: {
-      type: Boolean,
+    installation: {
+      type: Object,
+      required: true,
     },
   },
   computed: {
@@ -84,7 +96,7 @@ export default {
   methods: {
     async install() {
       this.begun = true;
-      this.install = true;
+      this.installation.installing = true;
 
       // Disable ESLint rule checks for these lines, as the AirBnb standard doesn't seem to handle
       // async work very well.
@@ -97,7 +109,7 @@ export default {
           await this.installStep(key);
         } catch (e) {
           this.setError(e);
-          break;
+          return;
         }
       }
 
@@ -163,6 +175,35 @@ export default {
     background-position: center;
   }
 
+  .danger-logo {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin-bottom: $layout-spacing;
+
+    border-radius: 50%;
+    background-color: $error-color;
+    overflow: hidden;
+
+    &:after {
+      content: '✗';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      width: 70px;
+      height: 70px;
+      margin-top: -35px;
+      margin-left: -40px;
+      animation: showTick 1s cubic-bezier(0, 1.5, 1, 1) 500ms both;
+
+      color: $light-color;
+      text-align: center;
+      line-height: 70px;
+      font-weight: 700;
+      font-size: 6em;
+    }
+  }
+
   .install-steps {
     position: relative;
     height: 170px;
@@ -190,16 +231,24 @@ export default {
     }
 
     .install-step-item {
-      transition: all 500ms ease;
       display: block;
       text-align: center;
       font-size: $font-size-lg;
       margin-bottom: $unit-2;
       font-weight: bold;
     }
+  }
 
-    .install-step-enter, .install-step-leave-to {
-      opacity: 0;
+  .error {
+    background: lighten($error-color, 10%);
+    color: $light-color;
+    border-radius: $border-radius;
+
+    width: 100%;
+    padding: $layout-spacing-sm $layout-spacing;
+
+    p:last-child {
+      margin-bottom: 0;
     }
   }
 }

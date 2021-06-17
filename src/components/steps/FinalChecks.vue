@@ -3,7 +3,7 @@
     <div class="step-content">
       <h4>Last checks.</h4>
 
-      <p>To ensure that Winter CMS will install and run with your configuration, we're doing some
+      <p>To ensure that Winter CMS can install and run with your configuration, we're doing some
         final checks.</p>
     </div>
     <div class="checks">
@@ -120,7 +120,11 @@ export default {
           if (responses[0].success) {
             this.checks.database.description = 'We were successfully able to connect to the database.';
           } else {
-            this.checks.database.description = 'We could not connect to the database. Please check your database settings.';
+            if (responses[0].data.dbNotEmpty) {
+              this.checks.database.description = 'The database you are installing to is not empty. Please delete all tables within this database before proceeding.';
+            } else {
+              this.checks.database.description = 'We could not connect to the database. Please check your database settings.';
+            }
           }
 
           if (responses[1].success) {
