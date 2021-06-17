@@ -18,7 +18,7 @@ module.exports = {
     },
   },
   assetsDir: 'install/assets',
-  indexPath: 'install.htm',
+  indexPath: 'install.html',
   lintOnSave: false,
   productionSourceMap: false,
   publicPath: './',
