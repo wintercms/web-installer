@@ -774,7 +774,7 @@ class Api
      * @param \Exception $exception
      * @return void
      */
-    protected function handleError($exception)
+    public function handleException($exception)
     {
         $this->data['code'] = $exception->getCode();
         $this->data['file'] = $exception->getFile();
