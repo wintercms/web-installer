@@ -11,6 +11,7 @@
         :key="i"
         v-text="step.name"
         @click.prevent="onClick(step)"
+        tabindex="-1"
       ></a>
     </div>
   </div>
