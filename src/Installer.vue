@@ -178,6 +178,13 @@ body {
   }
 }
 
+@media (screen and max-width: 1344px) {
+  #installer-container {
+    #installer {
+      min-height: initial;
+    }
+  }
+}
 @media (screen and max-width: 768px) {
   #installer-container {
     #installer {
