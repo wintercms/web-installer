@@ -163,6 +163,7 @@ body {
     border-radius: $border-radius;
     box-shadow: 0px 12px 6px rgba(0, 0, 0, 0.18);
     margin: 2em auto;
+    min-height: 650px;
 
     .content {
       position: relative;
