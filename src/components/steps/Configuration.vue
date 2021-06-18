@@ -512,4 +512,14 @@ export default {
 .text-sm {
   font-size: $font-size-sm;
 }
+@media(screen and max-width: 576px) {
+  .column {
+    flex-direction: column;
+    flex-basis: auto;
+    padding-top: 8px;
+  }
+  .columns+.columns {
+    margin-top: 0;
+  }
+}
 </style>
