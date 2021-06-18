@@ -168,6 +168,11 @@ body {
       position: relative;
       height: 100%;
       width: calc(100vw - 250px /* sidebar width */ - (1.6rem /* container l+r padding */ * 2));
+      max-width: calc(
+        1344px /* max container width */
+        - 250px /* sidebar width */
+        - (1.6rem /* container l+r padding */ * 2)
+      );
     }
   }
 }
