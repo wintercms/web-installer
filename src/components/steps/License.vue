@@ -82,12 +82,15 @@ p {
 .license {
   flex-grow: 2;
   flex-shrink: 1;
-  margin: 0 $layout-spacing $layout-spacing;
+  margin: 0 $layout-spacing .6rem;
   padding: $layout-spacing;
   overflow: auto;
-
+  max-height: 380px;
   border: 1px solid $gray-color;
   background: $gray-color-light;
   font-size: $font-size-sm;
+  @media (screen and max-width: 576px) {
+    max-height: initial;
+  }
 }
 </style>
