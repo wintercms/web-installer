@@ -714,7 +714,7 @@ class Api
                     'database' => $dbConfig['name'],
                     'username' => $dbConfig['user'] ?? '',
                     'password' => $dbConfig['pass'] ?? '',
-                    'charset' => 'utf8mb4',
+                    'charset' => $dbConfig['type'] === 'pgsql' ? 'utf8' : 'utf8mb4',
                     'collation' => 'utf8mb4_unicode_ci',
                     'prefix' => '',
                 ]);
