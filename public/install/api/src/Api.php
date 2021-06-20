@@ -714,7 +714,7 @@ class Api
                     'database' => $dbConfig['name'],
                     'username' => $dbConfig['user'] ?? '',
                     'password' => $dbConfig['pass'] ?? '',
-                    'charset' => $dbConfig['type'] === 'mysql' ? 'utf8mb4' : 'utf8',
+                    'charset' => ($dbConfig['type'] === 'mysql') ? 'utf8mb4' : 'utf8',
                     'collation' => 'utf8mb4_unicode_ci',
                     'prefix' => '',
                 ]);
