@@ -33,6 +33,13 @@ legend {
   &.label-lg {
     font-size: 1.2em;
   }
+
+  &.label-required {
+    &::after {
+      content: ' •';
+      color: $code-color;
+    }
+  }
 }
 
 .help {

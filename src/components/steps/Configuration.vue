@@ -16,7 +16,7 @@
                   slim
                 >
                   <div class="form-group" :class="{ 'has-error': dirty && invalid }">
-                    <label class="form-label label-lg" for="siteName">Site name</label>
+                    <label class="form-label label-lg label-required" for="siteName">Site name</label>
                     <small class="help">
                       Enter the name of your next awesome project.
                     </small>
@@ -46,7 +46,7 @@
                   slim
                 >
                   <div class="form-group" :class="{ 'has-error': dirty && invalid }">
-                    <label class="form-label" for="siteUrl">Site URL</label>
+                    <label class="form-label label-required" for="siteUrl">Site URL</label>
                     <small class="help">
                       Please provide a publicly-available address to your site. Make sure to include
                       <strong>https://</strong> or <strong>http://</strong> at the beginning of your URL.
@@ -133,7 +133,7 @@
                   slim
                 >
                   <div class="form-group" :class="{ 'has-error': dirty && invalid }">
-                    <label class="form-label" for="databaseHost">Server Hostname</label>
+                    <label class="form-label label-required" for="databaseHost">Server Hostname</label>
                     <input
                       type="text"
                       class="form-input"
@@ -171,7 +171,7 @@
                   slim
                 >
                   <div class="form-group" :class="{ 'has-error': dirty && invalid }">
-                    <label class="form-label" for="databaseName">Database Name</label>
+                    <label class="form-label label-required" for="databaseName">Database Name</label>
                     <input
                       type="text"
                       class="form-input"
@@ -198,7 +198,7 @@
                   slim
                 >
                   <div class="form-group" :class="{ 'has-error': dirty && invalid }">
-                    <label class="form-label" for="databasePort">Server Port</label>
+                    <label class="form-label label-required" for="databasePort">Server Port</label>
                     <input
                       type="text"
                       class="form-input"
@@ -273,7 +273,7 @@
                   slim
                 >
                   <div class="form-group" :class="{ 'has-error': dirty && invalid }">
-                    <label class="form-label" for="adminUsername">Username</label>
+                    <label class="form-label label-required" for="adminUsername">Username</label>
                     <input
                       type="text"
                       class="form-input"
@@ -299,7 +299,7 @@
                   slim
                 >
                   <div class="form-group" :class="{ 'has-error': dirty && invalid }">
-                    <label class="form-label" for="adminEmail">Email Address</label>
+                    <label class="form-label label-required" for="adminEmail">Email Address</label>
                     <input
                       type="email"
                       class="form-input"
@@ -339,7 +339,7 @@
                   slim
                 >
                   <div class="form-group" :class="{ 'has-error': dirty && invalid }">
-                    <label class="form-label" for="adminPassword">Password</label>
+                    <label class="form-label label-required" for="adminPassword">Password</label>
                     <div class="input-group">
                       <input
                         :type="(passwordVisible) ? 'text' : 'password'"
