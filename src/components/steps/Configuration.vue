@@ -217,14 +217,22 @@
 
                 <div class="form-group">
                   <label class="form-label" for="databasePass">Password</label>
-                  <input
-                    type="password"
-                    class="form-input"
-                    name="databasePass"
-                    v-model="site.database.pass"
-                    tabindex="8"
-                    :disabled="installing"
-                  >
+                  <div class="input-group">
+                    <input
+                      :type="(passwordVisible) ? 'text' : 'password'"
+                      class="form-input"
+                      name="databasePass"
+                      v-model="site.database.pass"
+                      tabindex="8"
+                      :disabled="installing"
+                    >
+                    <Click
+                      @press="togglePasswordVisibility"
+                      :label="(passwordVisible) ? 'Hide' : 'Show'"
+                      addClasses="input-group-btn"
+                      flag="primary"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -243,36 +251,23 @@
           <Tab name="Administrator">
             <div class="columns">
               <div class="column">
-                <ValidationProvider
-                  name="First Name"
-                  mode="eager"
-                  rules="required"
-                  :immediate="false"
-                  v-slot="{ dirty, invalid, errors }"
-                  slim
-                >
-                  <div class="form-group" :class="{ 'has-error': dirty && invalid }">
-                    <label class="form-label" for="adminFirstName">First Name</label>
-                    <input
-                      type="text"
-                      class="form-input"
-                      name="adminFirstName"
-                      placeholder="Enter the admin's first name"
-                      v-model="site.admin.firstName"
-                      tabindex="10"
-                      :disabled="installing"
-                    >
-                    <transition name="fade">
-                      <div v-if="dirty && errors.length" class="form-error" v-text="errors[0]">
-                      </div>
-                    </transition>
-                  </div>
-                </ValidationProvider>
+                <div class="form-group">
+                  <label class="form-label" for="adminFirstName">First Name</label>
+                  <input
+                    type="text"
+                    class="form-input"
+                    name="adminFirstName"
+                    placeholder="Enter the admin's first name"
+                    v-model="site.admin.firstName"
+                    tabindex="10"
+                    :disabled="installing"
+                  >
+                </div>
 
                 <ValidationProvider
                   name="Username"
                   mode="eager"
-                  rules="required"
+                  rules="required|min:2|max:255"
                   :immediate="false"
                   v-slot="{ dirty, invalid, errors }"
                   slim
@@ -296,7 +291,7 @@
                 </ValidationProvider>
 
                 <ValidationProvider
-                  name="Username"
+                  name="Email Address"
                   mode="eager"
                   rules="required|email"
                   :immediate="false"
@@ -322,51 +317,46 @@
                 </ValidationProvider>
               </div>
               <div class="column">
-                <ValidationProvider
-                  name="Surname"
-                  mode="eager"
-                  rules="required"
-                  :immediate="false"
-                  v-slot="{ dirty, invalid, errors }"
-                  slim
-                >
-                  <div class="form-group" :class="{ 'has-error': dirty && invalid }">
-                    <label class="form-label" for="adminLastName">Surname</label>
-                    <input
-                      type="text"
-                      class="form-input"
-                      name="adminLastName"
-                      placeholder="Enter the admin's surname"
-                      v-model="site.admin.lastName"
-                      tabindex="11"
-                      :disabled="installing"
-                    >
-                    <transition name="fade">
-                      <div v-if="dirty && errors.length" class="form-error" v-text="errors[0]">
-                      </div>
-                    </transition>
-                  </div>
-                </ValidationProvider>
+                <div class="form-group">
+                  <label class="form-label" for="adminLastName">Surname</label>
+                  <input
+                    type="text"
+                    class="form-input"
+                    name="adminLastName"
+                    placeholder="Enter the admin's surname"
+                    v-model="site.admin.lastName"
+                    tabindex="11"
+                    :disabled="installing"
+                  >
+                </div>
 
                 <ValidationProvider
                   name="Password"
                   mode="eager"
-                  rules="required"
+                  rules="required|min:4"
                   :immediate="false"
                   v-slot="{ dirty, invalid, errors }"
                   slim
                 >
                   <div class="form-group" :class="{ 'has-error': dirty && invalid }">
                     <label class="form-label" for="adminPassword">Password</label>
-                    <input
-                      type="password"
-                      class="form-input"
-                      name="adminPassword"
-                      placeholder="Enter the admin's password"
-                      v-model="site.admin.password"
-                      tabindex="13"
-                      :disabled="installing"
-                    >
+                    <div class="input-group">
+                      <input
+                        :type="(passwordVisible) ? 'text' : 'password'"
+                        class="form-input"
+                        name="adminPassword"
+                        placeholder="Enter the admin's password"
+                        v-model="site.admin.password"
+                        tabindex="13"
+                        :disabled="installing"
+                      >
+                      <Click
+                        @press="togglePasswordVisibility"
+                        :label="(passwordVisible) ? 'Hide' : 'Show'"
+                        addClasses="input-group-btn"
+                        flag="primary"
+                      />
+                    </div>
                     <transition name="fade">
                       <div v-if="dirty && errors.length" class="form-error" v-text="errors[0]">
                       </div>
@@ -409,7 +399,13 @@ import Click from '@/components/Click.vue';
 import Tabs from '@/components/Tabs.vue';
 import Tab from '@/components/Tab.vue';
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
-import { required, integer, email } from 'vee-validate/dist/rules';
+import {
+  required,
+  integer,
+  email,
+  min,
+  max,
+} from 'vee-validate/dist/rules';
 
 // Import required validation rules
 extend('required', {
@@ -423,6 +419,14 @@ extend('email', {
 extend('integer', {
   ...integer,
   message: '{_field_} must be a number.',
+});
+extend('min', {
+  ...min,
+  message: '{_field_} must be at least {length} characters.',
+});
+extend('max', {
+  ...max,
+  message: '{_field_} must be at most {length} characters.',
 });
 
 // Custom validation rules
@@ -479,6 +483,7 @@ export default {
       stepName: 'Configuration',
       firstView: true,
       activeTab: 'Site',
+      passwordVisible: false,
     };
   },
   watch: {
@@ -494,6 +499,9 @@ export default {
       if (tab) {
         this.activeTab = tab.name;
       }
+    },
+    togglePasswordVisibility() {
+      this.passwordVisible = !this.passwordVisible;
     },
     complete() {
       this.$store.dispatch('steps/setStatus', {
