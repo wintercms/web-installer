@@ -63,6 +63,9 @@ export default {
       type: Boolean,
       default: false,
     },
+    addClasses: {
+      type: String,
+    },
   },
   data() {
     return {
@@ -83,6 +86,9 @@ export default {
       }
       if (this.pressed) {
         classes.push('pressed');
+      }
+      if (this.addClasses) {
+        classes.push(this.addClasses);
       }
 
       return classes.join(' ');
