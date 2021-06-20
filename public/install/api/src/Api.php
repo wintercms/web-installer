@@ -641,7 +641,8 @@ class Api
     {
         $suffix = ltrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $suffix), '/\\');
 
-        return dirname(dirname(dirname(__DIR__))) . (!empty($suffix) ? DIRECTORY_SEPARATOR . $suffix : '');
+        return (str_replace(['/', '\\'], DIRECTORY_SEPARATOR, dirname(dirname(dirname(__DIR__)))))
+            . (!empty($suffix) ? DIRECTORY_SEPARATOR . $suffix : '');
     }
 
     /**
@@ -665,7 +666,8 @@ class Api
     {
         $suffix = ltrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $suffix), '/\\');
 
-        return rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . (!empty($suffix) ? DIRECTORY_SEPARATOR . $suffix : '');
+        return rtrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, sys_get_temp_dir()), DIRECTORY_SEPARATOR)
+            . (!empty($suffix) ? DIRECTORY_SEPARATOR . $suffix : '');
     }
 
     /**
