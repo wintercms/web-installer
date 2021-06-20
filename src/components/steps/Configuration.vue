@@ -23,6 +23,7 @@
                     <input
                       type="text"
                       class="form-input input-lg"
+                      id="siteName"
                       name="siteName"
                       placeholder="Enter your site name"
                       v-model="site.name"
@@ -54,6 +55,7 @@
                     <input
                       type="text"
                       class="form-input"
+                      id="siteUrl"
                       name="siteUrl"
                       placeholder="Enter your site URL"
                       v-model="site.url"
@@ -84,6 +86,7 @@
                     <input
                       type="text"
                       class="form-input"
+                      id="backendUrl"
                       name="backendUrl"
                       placeholder="Enter your backend path"
                       v-model="site.backendUrl"
@@ -107,6 +110,7 @@
                   <label class="form-label" for="databaseType">Database Type</label>
                   <select
                     class="form-select"
+                    id="databaseType"
                     name="databaseType"
                     v-model="site.database.type"
                     tabindex="4"
@@ -137,6 +141,7 @@
                     <input
                       type="text"
                       class="form-input"
+                      id="databaseHost"
                       name="databaseHost"
                       placeholder="Enter the database server hostname"
                       v-model="site.database.host"
@@ -155,6 +160,7 @@
                   <input
                     type="text"
                     class="form-input"
+                    id="databaseUser"
                     name="databaseUser"
                     v-model="site.database.user"
                     tabindex="7"
@@ -175,6 +181,7 @@
                     <input
                       type="text"
                       class="form-input"
+                      id="databaseName"
                       name="databaseName"
                       placeholder="Enter the database name"
                       v-model="site.database.name"
@@ -202,6 +209,7 @@
                     <input
                       type="text"
                       class="form-input"
+                      id="databasePort"
                       name="databasePort"
                       placeholder="Enter the database server port"
                       v-model="site.database.port"
@@ -221,6 +229,7 @@
                     <input
                       :type="(passwordVisible) ? 'text' : 'password'"
                       class="form-input"
+                      id="databasePass"
                       name="databasePass"
                       v-model="site.database.pass"
                       tabindex="8"
@@ -256,6 +265,7 @@
                   <input
                     type="text"
                     class="form-input"
+                    id="adminFirstName"
                     name="adminFirstName"
                     placeholder="Enter the admin's first name"
                     v-model="site.admin.firstName"
@@ -277,6 +287,7 @@
                     <input
                       type="text"
                       class="form-input"
+                      id="adminUsername"
                       name="adminUsername"
                       placeholder="Enter the admin username"
                       v-model="site.admin.username"
@@ -303,6 +314,7 @@
                     <input
                       type="email"
                       class="form-input"
+                      id="adminEmail"
                       name="adminEmail"
                       placeholder="Enter the admin email address"
                       v-model="site.admin.email"
@@ -322,6 +334,7 @@
                   <input
                     type="text"
                     class="form-input"
+                    id="adminLastName"
                     name="adminLastName"
                     placeholder="Enter the admin's surname"
                     v-model="site.admin.lastName"
@@ -344,6 +357,7 @@
                       <input
                         :type="(passwordVisible) ? 'text' : 'password'"
                         class="form-input"
+                        id="adminPassword"
                         name="adminPassword"
                         placeholder="Enter the admin's password"
                         v-model="site.admin.password"
