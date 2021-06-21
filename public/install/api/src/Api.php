@@ -29,8 +29,8 @@ class Api
     // Minimum PHP version required for Winter CMS
     const MIN_PHP_VERSION = '7.2.9';
 
-    // Winter CMS Ping API endpoint
-    const API_PING_URL = 'https://api.wintercms.com/marketplace/ping';
+    // Winter CMS API URL
+    const API_URL = 'https://api.wintercms.com/marketplace';
 
     // Winter CMS codebase archive
     const WINTER_ARCHIVE = 'https://github.com/wintercms/winter/archive/refs/heads/1.1.zip';
@@ -83,7 +83,12 @@ class Api
      */
     public function getCheckApi()
     {
-        $contents = @file_get_contents(self::API_PING_URL);
+        try {
+            $response = $this->apiRequest('GET', 'ping');
+        } catch (\Throwable $e) {
+            $this->error('Unable to establish a connection with the Winter CMS API.', 500);
+            return;
+        }
 
         if ($contents !== 'pong') {
             $this->error('Winter CMS API is unavailable', 500);
@@ -637,7 +642,7 @@ class Api
      *
      * @return string
      */
-    protected function rootDir(string $suffix = '')
+    protected function rootDir(string $suffix = ''): string
     {
         $suffix = ltrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $suffix), '/\\');
 
@@ -650,11 +655,29 @@ class Api
      *
      * @return string
      */
-    protected function workDir(string $suffix = '')
+    protected function workDir(string $suffix = ''): string
     {
         $suffix = ltrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $suffix), '/\\');
 
         return $this->rootDir('.wintercms' . (!empty($suffix) ? DIRECTORY_SEPARATOR . $suffix : ''));
+    }
+
+    /**
+     * Gets the base URL for the current install.
+     *
+     * @return string
+     */
+    protected function getBaseUrl(): string
+    {
+        if (isset($_SERVER['HTTP_HOST'])) {
+            $baseUrl = !empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off' ? 'https' : 'http';
+            $baseUrl .= '://'. $_SERVER['HTTP_HOST'];
+            $baseUrl .= str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']);
+        } else {
+            $baseUrl = 'http://localhost/';
+        }
+
+        return $baseUrl;
     }
 
     /**
@@ -738,12 +761,48 @@ class Api
         $kernel->bootstrap();
     }
 
+    protected function apiRequest(string $method = 'GET', string $uri = '', array $params = [])
+    {
+        if (!in_array($method, ['GET', 'POST'])) {
+            throw new \Exception('Invalid method for API request, must be GET or POST');
+        }
+
+        $curl = $this->prepareRequest($method, $uri, $params);
+    }
+
+    protected function prepareRequest(string $method = 'GET', string $uri = '', array $params = [])
+    {
+        $curl = curl_init();
+
+        // Set default params
+        $params['protocol_version'] = '1.2';
+        $params['client'] = 'winter-installer';
+        $params['server'] = base64_encode(json_encode([
+            'php' => PHP_VERSION,
+            'url' => $this->getBaseUrl(),
+        ]));
+
+        curl_setopt_array($curl, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 300,
+            CURLOPT_SSL_VERIFYHOST => true,
+            CURLOPT_SSL_VERIFYHOST => true,
+        ]);
+
+        if ($method === 'POST') {
+            curl_setopt($curl, CURLOPT_URL, self::API_URL . '/' . $uri);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($params));
+        } else {
+            curl_setopt($curl, CURLOPT_URL, self::API_URL . '/' . $uri . '?' . http_build_query($params));
+        }
+    }
+
     /**
      * Generates a cryptographically-secure key for encryption.
      *
-     * @return void
+     * @return string
      */
-    protected function generateKey()
+    protected function generateKey(): string
     {
         $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFHIJKLMNOPQRSTUVWXYZ0123456789';
         $max = strlen($chars) - 1;
@@ -760,6 +819,8 @@ class Api
      * PHP-based "rm -rf" command.
      * 
      * Recursively removes a directory and all files and subdirectories within.
+     * 
+     * @return void
      */
     protected function rimraf(string $path)
     {
