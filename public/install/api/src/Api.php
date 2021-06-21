@@ -299,7 +299,7 @@ class Api
             $composer->setMemoryLimit(1536);
             $composer->setWorkDir($this->workDir());
 
-            $tmpHomeDir = $this->tempDir('.composer');
+            $tmpHomeDir = $this->workDir('.composer');
 
             if (!is_dir($tmpHomeDir)) {
                 mkdir($tmpHomeDir, 0755);
@@ -330,7 +330,7 @@ class Api
             $composer->setMemoryLimit(1536);
             $composer->setWorkDir($this->workDir());
 
-            $tmpHomeDir = $this->tempDir('.composer');
+            $tmpHomeDir = $this->workDir('.composer');
 
             if (!is_dir($tmpHomeDir)) {
                 mkdir($tmpHomeDir, 0755);
@@ -475,7 +475,7 @@ class Api
 
         // Remove install folders
         $this->rimraf($this->rootDir('install'));
-        $this->rimraf($this->tempDir('.composer'));
+        $this->rimraf($this->workDir('.composer'));
 
         // Remove core development files
         $this->rimraf($this->workDir('.github'));
@@ -655,19 +655,6 @@ class Api
         $suffix = ltrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $suffix), '/\\');
 
         return $this->rootDir('.wintercms' . (!empty($suffix) ? DIRECTORY_SEPARATOR . $suffix : ''));
-    }
-
-    /**
-     * Gets the temp directory.
-     *
-     * @return string
-     */
-    protected function tempDir(string $suffix = '')
-    {
-        $suffix = ltrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $suffix), '/\\');
-
-        return rtrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, sys_get_temp_dir()), DIRECTORY_SEPARATOR)
-            . (!empty($suffix) ? DIRECTORY_SEPARATOR . $suffix : '');
     }
 
     /**
