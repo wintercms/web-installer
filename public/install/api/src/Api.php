@@ -386,11 +386,11 @@ class Api
             } else {
                 $this->rewriter->toFile($this->workDir('config/database.php'), [
                     'default' => $dbConfig['type'],
-                    'connections.' . $dbConfig['type'] . '.host' => $dbConfig['host'],
-                    'connections.' . $dbConfig['type'] . '.port' => $dbConfig['port'],
+                    'connections.' . $dbConfig['type'] . '.host' => $dbConfig['host'] ?? null,
+                    'connections.' . $dbConfig['type'] . '.port' => $dbConfig['port'] ?? $this->getDefaultDbPort($dbConfig['type']),
                     'connections.' . $dbConfig['type'] . '.database' => $dbConfig['name'],
-                    'connections.' . $dbConfig['type'] . '.username' => $dbConfig['user'],
-                    'connections.' . $dbConfig['type'] . '.password' => $dbConfig['pass'],
+                    'connections.' . $dbConfig['type'] . '.username' => $dbConfig['user'] ?? '',
+                    'connections.' . $dbConfig['type'] . '.password' => $dbConfig['pass'] ?? ''
                 ]);
             }
         } catch (\Throwable $e) {
