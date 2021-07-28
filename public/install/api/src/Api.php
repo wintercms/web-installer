@@ -162,6 +162,8 @@ class Api
      */
     public function postCheckDatabase()
     {
+        set_time_limit(60);
+
         $dbConfig = $this->data['site']['database'];
 
         // Create a temporary SQLite database if necessary
@@ -215,6 +217,8 @@ class Api
      */
     public function postDownloadWinter()
     {
+        set_time_limit(360);
+
         if (!is_dir($this->workDir())) {
             if (!@mkdir($this->workDir(), 0755, true)) {
                 $this->error('Unable to create a work directory for installation');
@@ -244,6 +248,8 @@ class Api
      */
     public function postExtractWinter()
     {
+        set_time_limit(120);
+
         $winterZip = $this->workDir('winter.zip');
 
         if (!file_exists($winterZip)) {
@@ -297,7 +303,7 @@ class Api
      */
     public function postLockDependencies()
     {
-        set_time_limit(60);
+        set_time_limit(360);
 
         try {
             $composer = new Composer();
@@ -422,6 +428,8 @@ class Api
      */
     public function postRunMigrations()
     {
+        set_time_limit(120);
+
         try {
             $this->bootFramework();
 
@@ -473,6 +481,8 @@ class Api
      */
     public function postCleanUp()
     {
+        set_time_limit(120);
+
         // Remove install files
         @unlink($this->workDir('winter.zip'));
         @unlink($this->rootDir('install.html'));
