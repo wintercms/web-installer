@@ -17,6 +17,13 @@ module.exports = {
       },
     },
   },
+  configureWebpack: {
+    devServer: {
+      watchOptions: {
+        ignored:[/public\/install/, /public\/install\.log/]
+      }
+    }
+  },
   assetsDir: 'install/assets',
   indexPath: 'install.html',
   lintOnSave: false,
