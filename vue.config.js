@@ -20,7 +20,7 @@ module.exports = {
   configureWebpack: {
     devServer: {
       watchOptions: {
-        ignored:[/public\/install/, /public\/install\.log/]
+        ignored: [/public\//]
       }
     }
   },
