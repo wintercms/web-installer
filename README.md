@@ -2,6 +2,8 @@
 
 [![Discord](https://img.shields.io/discord/816852513684193281?label=discord&style=flat-square)](https://discord.gg/D5MFSPH6Ux)
 
+![Web Installer Preview](https://raw.githubusercontent.com/wintercms/web-installer/main/.github/web-installer.jpg)
+
 A web-based installation script that will install a fresh copy of Winter CMS. This is the recommended method of installation for **non-technical users**. It is simpler than the command-line installation or Composer methods and does not require any special skills.
 
 For developers, we recommend the following methods:
