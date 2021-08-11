@@ -3,9 +3,10 @@
     "description": "Web-based installer for Winter CMS",
     "type": "project",
     "require": {
-        "illuminate/database": "^6.20.23",
+        "bennothommo/packager": "^0.1.2",
         "doctrine/dbal": "^2.12",
-        "bennothommo/packager": "^0.1.0"
+        "illuminate/database": "^6.20.23",
+        "monolog/monolog": "^2.2.0"
     },
     "autoload": {
         "psr-4": {
