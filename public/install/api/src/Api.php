@@ -603,7 +603,6 @@ class Api
     public function postCleanUp()
     {
         set_time_limit(120);
-        die();
 
         // Remove install files
         $this->log->notice('Removing installation files');
