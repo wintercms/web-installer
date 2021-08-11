@@ -7,6 +7,10 @@ use ReflectionMethod;
 use DirectoryIterator;
 use BennoThommo\Packager\Composer;
 use Illuminate\Database\Capsule\Manager as Capsule;
+use Monolog\Logger;
+use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\StreamHandler;
+use Symfony\Component\Console\Output\BufferedOutput;
 
 /**
  * API Class
@@ -38,6 +42,9 @@ class Api
     // Archive subfolder
     const ARCHIVE_SUBFOLDER = 'winter-1.1/';
 
+    /** @var Logger */
+    protected $logger;
+
     /** @var string Requested endpoint */
     protected $endpoint;
 
@@ -60,13 +67,20 @@ class Api
         // Disable display errors to prevent corruption of JSON responses
         ini_set('display_errors', 'Off');
 
+        $this->initialiseLogging();
+
         $this->setExceptionHandler();
+        
         $this->parseRequest();
 
+        $this->log->info('Installer API request received', [
+            'method' => $this->method,
+            'endpoint' => $this->endpoint,
+        ]);
+        
         $method = $this->getRequestedMethod();
         if (is_null($method)) {
-            $this->error('Invalid endpoint requested', 404);
-            return;
+            $this->error('Invalid Installer API endpoint requested', 404);
         }
 
         $this->{$method}();
@@ -83,17 +97,15 @@ class Api
      */
     public function getCheckApi()
     {
-        try {
-            $response = $this->apiRequest('GET', 'ping');
-        } catch (\Throwable $e) {
-            $this->error('Unable to establish a connection with the Winter CMS API.', 500);
-            return;
+        $this->log->notice('Trying Winter CMS API');
+        $response = $this->apiRequest('GET', 'ping');
+        $this->log->notice('Response received from Winter CMS API', ['response' => $response]);
+
+        if ($response !== 'pong') {
+            $this->error('Winter CMS API is unavailable', 500);
         }
 
-        if ($contents !== 'pong') {
-            $this->error('Winter CMS API is unavailable', 500);
-            return;
-        }
+        $this->log->notice('Winter CMS API connection successful.');
     }
 
     /**
@@ -113,9 +125,16 @@ class Api
             'installPath' => $this->rootDir(),
         ];
 
+        $this->log->notice('Compared PHP version', [
+            'installed' => PHP_VERSION,
+            'needed' => self::MIN_PHP_VERSION
+        ]);
+
         if (!$hasVersion) {
             $this->error('PHP version requirement not met.');
         }
+
+        $this->log->notice('PHP version requirement met.');
     }
 
     /**
@@ -127,18 +146,25 @@ class Api
      */
     public function getCheckPhpExtensions()
     {
+        $this->log->notice('Checking PHP "curl" extension');
         if (!function_exists('curl_init') || !defined('CURLOPT_FOLLOWLOCATION')) {
             $this->data['extension'] = 'curl';
             $this->error('Missing extension');
         }
+
+        $this->log->notice('Checking PHP "json" extension');
         if (!function_exists('json_decode')) {
             $this->data['extension'] = 'json';
             $this->error('Missing extension');
         }
+
+        $this->log->notice('Checking PHP "pdo" extension');
         if (!defined('PDO::ATTR_DRIVER_NAME')) {
             $this->data['extension'] = 'pdo';
             $this->error('Missing extension');
         }
+
+        $this->log->notice('Checking PHP "zip" extension');
         if (!class_exists('ZipArchive')) {
             $this->data['extension'] = 'zip';
             $this->error('Missing extension');
@@ -146,11 +172,15 @@ class Api
 
         $extensions = ['mbstring', 'fileinfo', 'openssl', 'gd', 'filter', 'hash'];
         foreach ($extensions as $ext) {
+            $this->log->notice('Checking PHP "' . $ext . '" extension');
+
             if (!extension_loaded($ext)) {
                 $this->data['extension'] = $ext;
                 $this->error('Missing extension');
             }
         }
+
+        $this->log->notice('Required PHP extensions are installed.');
     }
 
     /**
@@ -167,19 +197,26 @@ class Api
         $dbConfig = $this->data['site']['database'];
 
         // Create a temporary SQLite database if necessary
-        try {
-            if (!is_file($this->rootDir('.temp.sqlite'))) {
-                touch($this->rootDir('.temp.sqlite'));
+        if ($dbConfig['type'] === 'sqlite') {
+            $this->log->notice('Creating temporary SQLite DB', ['path' => $this->rootDir('.temp.sqlite')]);
+
+            try {
+                if (!is_file($this->rootDir('.temp.sqlite'))) {
+                    touch($this->rootDir('.temp.sqlite'));
+                }
+            } catch (\Throwable $e) {
+                $this->data['exception'] = $e->getMessage();
+                $this->error('Unable to create a temporary SQLite database.');
             }
-        } catch (\Throwable $e) {
-            $this->data['exception'] = $e->getMessage();
-            $this->error('Unable to create a temporary SQLite database.');
         }
 
         try {
+            $this->log->notice('Check database connection');
             $capsule = $this->createCapsule($dbConfig);
             $connection = $capsule->getConnection();
+
             $tables = $connection->getDoctrineSchemaManager()->listTableNames();
+            $this->log->notice('Found ' . count($tables) . ' table(s)', ['tables' => implode(', ', $tables)]);
         } catch (\Throwable $e) {
             $this->data['exception'] = $e->getMessage();
             $this->error('Database could not be connected to.');
@@ -189,6 +226,8 @@ class Api
             $this->data['dbNotEmpty'] = true;
             $this->error('Database is not empty.');
         }
+
+        $this->log->notice('Database connection established and verified empty');
     }
 
     /**
@@ -206,6 +245,7 @@ class Api
         }
 
         $this->data['writable'] = true;
+        $this->log->notice('Current working directory is writable.');
     }
 
     /**
@@ -228,14 +268,51 @@ class Api
         $winterZip = $this->workDir('winter.zip');
 
         if (!file_exists($winterZip)) {
+            $this->log->notice('Try downloading Winter CMS archive');
+
             try {
-                file_put_contents(
-                    $winterZip,
-                    file_get_contents(self::WINTER_ARCHIVE)
-                );
+                $fp = fopen($winterZip, 'w');
+                if (!$fp) {
+                    $this->log->error('Winter ZIP file unwritable', ['path' => $winterZip]);
+                    $this->error('Unable to write the Winter installation file');
+                }
+                $curl = curl_init();
+
+                // Set default params
+                $params['client'] = 'winter-installer';
+
+                curl_setopt_array($curl, [
+                    CURLOPT_URL => self::WINTER_ARCHIVE,
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_TIMEOUT => 300,
+                    CURLOPT_SSL_VERIFYPEER => true,
+                    CURLOPT_SSL_VERIFYHOST => 2,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_MAXREDIRS => 5,
+                    CURLOPT_FILE => $fp
+                ]);
+
+                $this->log->notice('Downloading Winter ZIP via cURL', ['url' => self::WINTER_ARCHIVE]);
+                curl_exec($curl);
+                $responseCode = curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
+                if ($responseCode < 200 || $responseCode > 299) {
+                    throw new \Exception('Invalid HTTP code received - got ' . $responseCode);
+                }
+
+                curl_close($curl);
             } catch (\Throwable $e) {
+                if (isset($fp)) {
+                    fclose($fp);
+                }
+                if (isset($curl) && is_resource($curl)) {
+                    curl_close($curl);
+                }
                 $this->error('Unable to download Winter CMS. ' . $e->getMessage());
             }
+
+            $this->log->notice('Winter CMS ZIP file downloaded', ['path' => $winterZip]);
+        } else {
+            $this->log->notice('Winter CMS ZIP file already downloaded', ['path' => $winterZip]);
         }
     }
 
@@ -258,6 +335,7 @@ class Api
         }
 
         try {
+            $this->log->notice('Begin extracting Winter CMS archive');
             $zip = new ZipArchive();
             $zip->open($winterZip);
         } catch (\Throwable $e) {
@@ -267,6 +345,8 @@ class Api
         $zip->extractTo($this->workDir());
 
         if (!empty(self::ARCHIVE_SUBFOLDER)) {
+            $this->log->notice('Move subfoldered files into position', ['subfolder' => self::ARCHIVE_SUBFOLDER]);
+
             // Move files from subdirectory into install folder
             $dir = new DirectoryIterator($this->workDir(self::ARCHIVE_SUBFOLDER));
 
@@ -283,13 +363,21 @@ class Api
 
         // Clean up
         $zip->close();
-        rmdir($this->workDir(self::ARCHIVE_SUBFOLDER));
+        if (!empty(self::ARCHIVE_SUBFOLDER)) {
+            $this->log->notice('Remove ZIP subfolder', ['subfolder' => self::ARCHIVE_SUBFOLDER]);
+            rmdir($this->workDir(self::ARCHIVE_SUBFOLDER));
+        }
 
         // Make artisan command-line tool executable
+        $this->log->notice('Make artisan command-line tool executable', ['path' => $this->workDir('artisan')]);
         chmod($this->workDir('artisan'), 0755);
 
         // If using SQLite, move temp SQLite DB into position
         if ($this->data['site']['database']['type'] === 'sqlite' && is_file($this->rootDir('.temp.sqlite'))) {
+            $this->log->notice('Move temp SQLite DB into position', [
+                'from' => $this->rootDir('.temp.sqlite'),
+                'to' => $this->workDir('storage/database.sqlite')
+            ]);
             rename($this->rootDir('.temp.sqlite'), $this->workDir('storage/database.sqlite'));
         }
     }
@@ -306,22 +394,32 @@ class Api
         set_time_limit(360);
 
         try {
+            $this->log->notice('Create Composer instance');
             $composer = new Composer();
+            $this->log->notice('Set memory limit to 1.5GB');
             $composer->setMemoryLimit(1536);
+            $this->log->notice('Set work directory for Composer', ['path' => $this->workDir()]);
             $composer->setWorkDir($this->workDir());
 
             $tmpHomeDir = $this->workDir('.composer');
 
             if (!is_dir($tmpHomeDir)) {
+                $this->log->notice('Create home/cache directory for Composer', ['path' => $tmpHomeDir]);
                 mkdir($tmpHomeDir, 0755);
             }
+            $this->log->notice('Set home/cache directory for Composer', ['path' => $tmpHomeDir]);
             $composer->setHomeDir($tmpHomeDir);
 
+            $this->log->notice('Run Composer "update" command - generate only a lockfile');
             $update = $composer->update(true, true);
         } catch (\Throwable $e) {
             $this->error('Unable to determine dependencies for Winter CMS. ' . $e->getMessage());
         }
 
+        $this->log->notice('Locked Composer packages', [
+            'numPackages' => $update->getLockInstalledCount(),
+            'lockFile' => $this->workDir('composer.lock'),
+        ]);
         $this->data['packagesInstalled'] = $update->getLockInstalledCount();
     }
 
@@ -337,22 +435,31 @@ class Api
         set_time_limit(180);
 
         try {
+            $this->log->notice('Create Composer instance');
             $composer = new Composer();
+            $this->log->notice('Set memory limit to 1.5GB');
             $composer->setMemoryLimit(1536);
+            $this->log->notice('Set work directory for Composer', ['path' => $this->workDir()]);
             $composer->setWorkDir($this->workDir());
 
             $tmpHomeDir = $this->workDir('.composer');
 
             if (!is_dir($tmpHomeDir)) {
+                $this->log->notice('Create home/cache directory for Composer', ['path' => $tmpHomeDir]);
                 mkdir($tmpHomeDir, 0755);
             }
+            $this->log->notice('Set home/cache directory for Composer', ['path' => $tmpHomeDir]);
             $composer->setHomeDir($tmpHomeDir);
 
+            $this->log->notice('Run Composer "install" command - install from lockfile');
             $install = $composer->install(true);
         } catch (\Throwable $e) {
             $this->error('Unable to determine dependencies for Winter CMS. ' . $e->getMessage());
         }
 
+        $this->log->notice('Installed Composer packages', [
+            'numPackages' => $install->getInstalledCount(),
+        ]);
         $this->data['packagesInstalled'] = $install->getInstalledCount();
     }
 
@@ -371,6 +478,7 @@ class Api
             $this->rewriter = new ConfigRewriter;
 
             // config/app.php
+            $this->log->notice('Rewriting config', ['path' => $this->workDir('config/app.php')]);
             $this->rewriter->toFile($this->workDir('config/app.php'), [
                 'name' => $this->data['site']['name'],
                 'url' => $this->data['site']['url'],
@@ -378,6 +486,7 @@ class Api
             ]);
 
             // config/cms.php
+            $this->log->notice('Rewriting config', ['path' => $this->workDir('config/cms.php')]);
             $this->rewriter->toFile($this->workDir('config/cms.php'), [
                 'backendUri' => '/' . $this->data['site']['backendUrl'],
             ]);
@@ -385,6 +494,7 @@ class Api
             // config/database.php
             $dbConfig = $this->data['site']['database'];
 
+            $this->log->notice('Rewriting config', ['path' => $this->workDir('config/database.php')]);
             if ($dbConfig['type'] === 'sqlite') {
                 $this->rewriter->toFile($this->workDir('config/database.php'), [
                     'default' => 'sqlite',
@@ -412,9 +522,11 @@ class Api
         }
 
         if (function_exists('opcache_reset') && $opcacheEnabled) {
+            $this->log->notice('Flushing OPCache');
             opcache_reset();
         }
         if (function_exists('apc_clear_cache')) {
+            $this->log->notice('Flushing APC Cache');
             apc_clear_cache();
         }
     }
@@ -433,8 +545,15 @@ class Api
         try {
             $this->bootFramework();
 
-            \Illuminate\Support\Facades\Artisan::call('config:clear');
-            \Illuminate\Support\Facades\Artisan::call('october:up');
+            $this->log->notice('Running artisan "config:clear" command');
+            $output = new BufferedOutput();
+            \Illuminate\Support\Facades\Artisan::call('config:clear', [], $output);
+            $this->log->notice('Command finished.', ['output' => $output->fetch()]);
+
+            $this->log->notice('Running database migrations');
+            $output = new BufferedOutput();
+            \Illuminate\Support\Facades\Artisan::call('winter:up', [], $output);
+            $this->log->notice('Command finished.', ['output' => $output->fetch()]);
         } catch (\Throwable $e) {
             $this->error('Unable to run migrations. ' . $e->getMessage());
         }
@@ -452,6 +571,7 @@ class Api
         try {
             $this->bootFramework();
 
+            $this->log->notice('Finding initial admin account');
             $admin = \Backend\Models\User::find(1);
         } catch (\Throwable $e) {
             $this->error('Unable to find administrator account. ' . $e->getMessage());
@@ -465,6 +585,7 @@ class Api
         $admin->last_name = $this->data['site']['admin']['lastName'];
 
         try {
+            $this->log->notice('Changing admin account to details provided in installation');
             $admin->save();
         } catch (\Throwable $e) {
             $this->error('Unable to save administrator account. ' . $e->getMessage());
@@ -482,17 +603,21 @@ class Api
     public function postCleanUp()
     {
         set_time_limit(120);
+        die();
 
         // Remove install files
+        $this->log->notice('Removing installation files');
         @unlink($this->workDir('winter.zip'));
         @unlink($this->rootDir('install.html'));
         @unlink($this->rootDir('install.zip'));
 
         // Remove install folders
+        $this->log->notice('Removing temporary installation folders');
         $this->rimraf($this->rootDir('install'));
         $this->rimraf($this->workDir('.composer'));
 
         // Remove core development files
+        $this->log->notice('Removing core development files');
         $this->rimraf($this->workDir('.github'));
         $this->rimraf($this->workDir('tests/fixtures'));
         $this->rimraf($this->workDir('tests/js'));
@@ -507,6 +632,10 @@ class Api
         @unlink($this->workDir('phpcs.xml'));
 
         // Move files from subdirectory into install folder
+        $this->log->notice('Moving files from temporary work directory to final installation path', [
+            'workDir' => $this->workDir(),
+            'installDir' => $this->rootDir(),
+        ]);
         $dir = new DirectoryIterator($this->workDir());
 
         foreach ($dir as $item) {
@@ -520,7 +649,30 @@ class Api
         }
 
         // Remove work directory
+        $this->log->notice('Removing work directory');
         rmdir($this->workDir());
+
+        $this->log->notice('Installation complete!');
+    }
+
+    /**
+     * Initialise the logging for the API / install.
+     *
+     * @return void
+     */
+    protected function initialiseLogging()
+    {
+        // Set format
+        $dateFormat = 'Y-m-d H:i:sP';
+        $logFormat = "[%datetime%] %level_name%: %message% %context% %extra%\n";
+        $formatter = new LineFormatter($logFormat, $dateFormat, false, true);
+
+        $this->log = new Logger('install');
+
+        $stream = new StreamHandler($this->rootDir('install.log'));
+        $stream->setFormatter($formatter);
+
+        $this->log->pushHandler($stream, Logger::INFO);
     }
 
     /**
@@ -644,6 +796,10 @@ class Api
     {
         $this->setResponseCode($code);
         $this->data['error'] = $message;
+        $this->log->error($message, [
+            'code' => $code,
+            'exception' => $this->data['exception'] ?? null
+        ]);
         $this->response(false);
     }
 
@@ -752,12 +908,15 @@ class Api
      */
     protected function bootFramework()
     {
+        $this->log->notice('Booting Laravel framework');
+
         $autoloadFile = $this->workDir('bootstrap/autoload.php');
         if (!file_exists($autoloadFile)) {
             $this->error('Unable to load bootstrap file for framework from "' . $autoloadFile . '".');
             return;
         }
 
+        $this->log->notice('Loading autoloader');
         require $autoloadFile;
 
         $appFile = $this->workDir('bootstrap/app.php');
@@ -766,6 +925,7 @@ class Api
             return;
         }
 
+        $this->log->notice('Bootstrapping kernel');
         $app = require_once $appFile;
         $kernel = $app->make('Illuminate\Contracts\Console\Kernel');
         $kernel->bootstrap();
@@ -778,8 +938,52 @@ class Api
         }
 
         $curl = $this->prepareRequest($method, $uri, $params);
+        $this->log->info('Winter API request', ['method' => $method, 'uri' => $uri]);
+        $response = curl_exec($curl);
+
+        // Normalise line endings
+        $response = str_replace(["\r\n", "\n"], "\n", $response);
+
+        // Parse response and code
+        $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $contentType = explode('; ', curl_getinfo($curl, CURLINFO_CONTENT_TYPE))[0];
+        $errored = false;
+
+        if ($code < 200 || $code > 299) {
+            $this->log->error('HTTP code returned indicates an error', ['code' => $code]);
+            $this->log->debug('Response received from Winter API', ['response' => $response]);
+            $errored = true;
+        }
+
+        // Parse JSON
+        if ($contentType === 'application/json' || $contentType === 'text/json') {
+            $response = json_decode($response, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $this->log->error('JSON data sent from server, but unable to parse', ['jsonError' => json_last_error_msg()]);
+                $this->log->debug('Response received from Winter API', ['response' => $response]);
+                $errored = true;
+                $response = 'Unable to parse JSON response from server';
+            }
+        }
+
+        curl_close($curl);
+
+        if ($errored === true) {
+            throw new \Exception('An error occurred trying to communicate with the Winter CMS API: ' . $response);
+        }
+
+        return $response;
     }
 
+    /**
+     * Prepares a cURL request to the Winter CMS API.
+     *
+     * @param string $method One of "GET", "POST"
+     * @param string $uri
+     * @param array $params
+     * @return \CurlHandle|resource
+     */
     protected function prepareRequest(string $method = 'GET', string $uri = '', array $params = [])
     {
         $curl = curl_init();
@@ -797,6 +1001,8 @@ class Api
             CURLOPT_TIMEOUT => 300,
             CURLOPT_SSL_VERIFYHOST => true,
             CURLOPT_SSL_VERIFYHOST => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 5,
         ]);
 
         if ($method === 'POST') {
@@ -805,6 +1011,8 @@ class Api
         } else {
             curl_setopt($curl, CURLOPT_URL, self::API_URL . '/' . $uri . '?' . http_build_query($params));
         }
+
+        return $curl;
     }
 
     /**
@@ -872,6 +1080,7 @@ class Api
         $this->data['code'] = $exception->getCode();
         $this->data['file'] = $exception->getFile();
         $this->data['line'] = $exception->getLine();
+        $this->log->error($exception->getMessage(), ['exception' => $exception]);
         $this->error($exception->getMessage());
     }
 }

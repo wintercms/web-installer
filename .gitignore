@@ -2,6 +2,7 @@
 node_modules
 /dist
 /public/.temp.sqlite
+/public/install.log
 
 # local env files
 .env.local
