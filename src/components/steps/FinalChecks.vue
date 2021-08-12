@@ -85,6 +85,12 @@ export default {
         this.runChecks();
       }
     },
+    'site.database': {
+      deep: true,
+      handler() {
+        this.resetChecks();
+      },
+    },
   },
   methods: {
     checkDescription(check) {
@@ -119,12 +125,10 @@ export default {
 
           if (responses[0].success) {
             this.checks.database.description = 'We were successfully able to connect to the database.';
+          } else if (responses[0].data.dbNotEmpty) {
+            this.checks.database.description = 'The database you are installing to is not empty. Please delete all tables within this database before proceeding.';
           } else {
-            if (responses[0].data.dbNotEmpty) {
-              this.checks.database.description = 'The database you are installing to is not empty. Please delete all tables within this database before proceeding.';
-            } else {
-              this.checks.database.description = 'We could not connect to the database. Please check your database settings.';
-            }
+            this.checks.database.description = 'We could not connect to the database. Please check your database settings.';
           }
 
           if (responses[1].success) {
@@ -151,14 +155,14 @@ export default {
       this.rerunChecks();
     },
     rerunChecks() {
-      this.ranChecks = false;
-      this.completedChecks = false;
-      this.checksSuccessful = false;
-
       this.resetChecks();
       this.runChecks();
     },
     resetChecks() {
+      this.ranChecks = false;
+      this.completedChecks = false;
+      this.checksSuccessful = false;
+
       this.checks = {
         database: {
           status: null,
