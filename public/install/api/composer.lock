@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "bennothommo/packager",
-            "version": "v0.1.3",
+            "version": "v0.1.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bennothommo/packager.git",
-                "reference": "d290889c46db10d6ca1c2357b0a5f0e58011cdd4"
+                "reference": "0b7486539c7a1829c3e3cd5e23a52c5fcdbcae6e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bennothommo/packager/zipball/d290889c46db10d6ca1c2357b0a5f0e58011cdd4",
-                "reference": "d290889c46db10d6ca1c2357b0a5f0e58011cdd4",
+                "url": "https://api.github.com/repos/bennothommo/packager/zipball/0b7486539c7a1829c3e3cd5e23a52c5fcdbcae6e",
+                "reference": "0b7486539c7a1829c3e3cd5e23a52c5fcdbcae6e",
                 "shasum": ""
             },
             "require": {
@@ -56,9 +56,9 @@
             ],
             "support": {
                 "issues": "https://github.com/bennothommo/packager/issues",
-                "source": "https://github.com/bennothommo/packager/tree/v0.1.3"
+                "source": "https://github.com/bennothommo/packager/tree/v0.1.4"
             },
-            "time": "2021-06-25T08:22:54+00:00"
+            "time": "2021-08-14T12:44:19+00:00"
         },
         {
             "name": "composer/ca-bundle",
