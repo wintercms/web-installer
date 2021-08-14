@@ -411,7 +411,7 @@ class Api
             $composer->setHomeDir($tmpHomeDir);
 
             $this->log->notice('Run Composer "update" command - generate only a lockfile');
-            $update = $composer->update(true, true);
+            $update = $composer->update(true, true, false, 'dist', true);
         } catch (\Throwable $e) {
             $this->error('Unable to determine dependencies for Winter CMS. ' . $e->getMessage());
         }
@@ -452,7 +452,7 @@ class Api
             $composer->setHomeDir($tmpHomeDir);
 
             $this->log->notice('Run Composer "install" command - install from lockfile');
-            $install = $composer->install(true);
+            $install = $composer->install(true, false, false, 'dist', true);
         } catch (\Throwable $e) {
             $this->error('Unable to determine dependencies for Winter CMS. ' . $e->getMessage());
         }
