@@ -998,8 +998,8 @@ class Api
         curl_setopt_array($curl, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => 300,
-            CURLOPT_SSL_VERIFYHOST => true,
-            CURLOPT_SSL_VERIFYHOST => true,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
         ]);
