@@ -170,6 +170,12 @@ class Api
             $this->error('Missing extension');
         }
 
+        $this->log->notice('Checking PHP "dom" extension');
+        if (!class_exists('DOMDocument')) {
+            $this->data['extension'] = 'dom';
+            $this->error('Missing extension');
+        }
+
         $extensions = ['mbstring', 'fileinfo', 'openssl', 'gd', 'filter', 'hash'];
         foreach ($extensions as $ext) {
             $this->log->notice('Checking PHP "' . $ext . '" extension');
