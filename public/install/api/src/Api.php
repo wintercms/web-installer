@@ -146,6 +146,12 @@ class Api
      */
     public function getCheckPhpExtensions()
     {
+        $this->log->notice('Checking PHP "proc_open" function');
+        if (!function_exists('proc_open')) {
+            $this->data['extension'] = 'proc_open function';
+            $this->error('Missing function');
+        }
+
         $this->log->notice('Checking PHP "curl" extension');
         if (!function_exists('curl_init') || !defined('CURLOPT_FOLLOWLOCATION')) {
             $this->data['extension'] = 'curl';
