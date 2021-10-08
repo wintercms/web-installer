@@ -380,6 +380,24 @@ class Api
             ]);
             rename($this->rootDir('.temp.sqlite'), $this->workDir('storage/database.sqlite'));
         }
+
+        // Rewrite composer.json to exclude the Composer Merge plugin, it seems to force the use of Symfony/Process and
+        // the "proc_open" method which is commonly disabled on shared hosts.
+        $this->log->notice('Remove Composer Merge plugin from composer.json if found', []);
+        $composerJson = json_decode(file_get_contents($this->workDir('composer.json')), true);
+
+        if (isset($composerJson['require']['wikimedia/composer-merge-plugin'])) {
+            $this->log->notice('Found merge plugin in required packages - removing', []);
+            unset($composerJson['require']['wikimedia/composer-merge-plugin']);
+        }
+        if (isset($composerJson['extra']['merge-plugin'])) {
+            $this->log->notice('Found merge plugin config in "extra" config definition - removing', []);
+            unset($composerJson['extra']['merge-plugin']);
+        }
+
+        if (!file_put_contents($this->workDir('composer.json'), json_encode($composerJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES))) {
+            $this->log->error('Unable to write new Composer config', ['path' => $this->workDir('composer.json')]);
+        }
     }
 
     /**
