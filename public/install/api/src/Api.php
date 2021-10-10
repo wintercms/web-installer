@@ -431,6 +431,9 @@ class Api
             $this->log->notice('Run Composer "update" command - generate only a lockfile');
             $update = $composer->update(true, true, false, 'dist', true);
         } catch (\Throwable $e) {
+            if (!empty($e->getPrevious())) {
+                $this->log->error('Composer exception', ['exception' => $e->getPrevious()]);
+            }
             $this->error('Unable to determine dependencies for Winter CMS. ' . $e->getMessage());
         }
 
