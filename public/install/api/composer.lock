@@ -4,62 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8ca7f20b07944af62b46c8a52a44a929",
+    "content-hash": "a48a87a84766c62072e9a29497e93c91",
     "packages": [
-        {
-            "name": "bennothommo/packager",
-            "version": "v0.1.4",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/bennothommo/packager.git",
-                "reference": "0b7486539c7a1829c3e3cd5e23a52c5fcdbcae6e"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/bennothommo/packager/zipball/0b7486539c7a1829c3e3cd5e23a52c5fcdbcae6e",
-                "reference": "0b7486539c7a1829c3e3cd5e23a52c5fcdbcae6e",
-                "shasum": ""
-            },
-            "require": {
-                "composer/composer": "^2.1.0",
-                "ext-openssl": "*",
-                "ext-zip": "*",
-                "ext-zlib": "*",
-                "php": "^7.2.9 || ^8.0",
-                "symfony/process": "^4.3.4 || ^5.0 || ^6.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^8.5.15 || ^9.5.4",
-                "symfony/phpunit-bridge": "^4.3.4 || ^5.0 || ^6.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "BennoThommo\\Packager\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Ben Thomson",
-                    "email": "git@alfreido.com"
-                }
-            ],
-            "description": "Run Composer commands within a PHP application",
-            "keywords": [
-                "composer",
-                "packager",
-                "php"
-            ],
-            "support": {
-                "issues": "https://github.com/bennothommo/packager/issues",
-                "source": "https://github.com/bennothommo/packager/tree/v0.1.4"
-            },
-            "time": "2021-08-14T12:44:19+00:00"
-        },
         {
             "name": "composer/ca-bundle",
             "version": "1.2.11",
@@ -1065,16 +1011,16 @@
         },
         {
             "name": "illuminate/database",
-            "version": "v6.20.34",
+            "version": "v6.20.35",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/database.git",
-                "reference": "8259b9b1f376b900714d292e9d391c206592e0cf"
+                "reference": "498fba63c2001432f97705bab132838fc44fdaf2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/database/zipball/8259b9b1f376b900714d292e9d391c206592e0cf",
-                "reference": "8259b9b1f376b900714d292e9d391c206592e0cf",
+                "url": "https://api.github.com/repos/illuminate/database/zipball/498fba63c2001432f97705bab132838fc44fdaf2",
+                "reference": "498fba63c2001432f97705bab132838fc44fdaf2",
                 "shasum": ""
             },
             "require": {
@@ -1126,7 +1072,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2021-08-26T13:34:05+00:00"
+            "time": "2021-09-29T13:14:17+00:00"
         },
         {
             "name": "illuminate/support",
@@ -2939,6 +2885,75 @@
                 }
             ],
             "time": "2021-03-23T23:28:01+00:00"
+        },
+        {
+            "name": "winter/packager",
+            "version": "v0.1.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/wintercms/packager.git",
+                "reference": "c2f41f5829c64ac4c664857aaee22260e66005b4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/wintercms/packager/zipball/c2f41f5829c64ac4c664857aaee22260e66005b4",
+                "reference": "c2f41f5829c64ac4c664857aaee22260e66005b4",
+                "shasum": ""
+            },
+            "require": {
+                "composer/composer": "^2.1.0",
+                "ext-openssl": "*",
+                "ext-zip": "*",
+                "ext-zlib": "*",
+                "php": "^7.2.9 || ^8.0",
+                "symfony/process": "^4.3.4 || ^5.0 || ^6.0"
+            },
+            "replace": {
+                "bennothommo/packager": "self.version"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^8.5.15 || ^9.5.4",
+                "symfony/phpunit-bridge": "^4.3.4 || ^5.0 || ^6.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Winter\\Packager\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ben Thomson",
+                    "email": "git@alfreido.com",
+                    "role": "Original author"
+                },
+                {
+                    "name": "Winter CMS Maintainers",
+                    "homepage": "https://wintercms.com",
+                    "role": "Maintainer"
+                }
+            ],
+            "description": "Run Composer commands within a PHP application",
+            "keywords": [
+                "composer",
+                "packager",
+                "php"
+            ],
+            "support": {
+                "issues": "https://github.com/wintercms/packager/issues",
+                "source": "https://github.com/wintercms/packager/tree/v0.1.5"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/LukeTowers",
+                    "type": "github"
+                }
+            ],
+            "time": "2021-10-12T00:54:32+00:00"
         }
     ],
     "packages-dev": [],
