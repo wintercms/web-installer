@@ -5,7 +5,7 @@ namespace Winter\Installer;
 use ZipArchive;
 use ReflectionMethod;
 use DirectoryIterator;
-use BennoThommo\Packager\Composer;
+use Winter\Packager\Composer;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Monolog\Logger;
 use Monolog\Formatter\LineFormatter;
