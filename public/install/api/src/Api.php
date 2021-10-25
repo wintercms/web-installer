@@ -170,7 +170,7 @@ class Api
             $this->error('Missing extension');
         }
 
-        $extensions = ['mbstring', 'fileinfo', 'openssl', 'gd', 'filter', 'hash'];
+        $extensions = ['mbstring', 'fileinfo', 'openssl', 'gd', 'filter', 'hash', 'dom'];
         foreach ($extensions as $ext) {
             $this->log->notice('Checking PHP "' . $ext . '" extension');
 
