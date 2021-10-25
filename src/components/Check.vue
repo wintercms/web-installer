@@ -6,6 +6,8 @@
     <div class="icon" v-else></div>
 
     <div class="description" v-text="description"></div>
+
+    <slot name="action"></slot>
   </div>
 </template>
 
@@ -99,6 +101,10 @@ export default {
     flex-grow: 1;
     flex-shrink: 1;
     text-align: center;
+  }
+
+  .description + button {
+    margin-top: 10px;
   }
 
   &.success {

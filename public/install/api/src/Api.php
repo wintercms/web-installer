@@ -11,6 +11,7 @@ use Monolog\Logger;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Winter\Installer\Exception\SSLValidationException;
 
 /**
  * API Class
@@ -106,6 +107,19 @@ class Api
         }
 
         $this->log->notice('Winter CMS API connection successful.');
+    }
+
+    /**
+     * POST /api.php?endpoint=ignoreCets
+     *
+     * Ignores SSL certificate validation issues for installer.
+     *
+     * @return void
+     */
+    public function postIgnoreCerts()
+    {
+        $this->log->notice('Ignoring SSL certificate validation issues');
+        touch($this->rootDir('.ignore-ssl'));
     }
 
     /**
@@ -285,17 +299,34 @@ class Api
                     CURLOPT_URL => self::WINTER_ARCHIVE,
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_TIMEOUT => 300,
-                    CURLOPT_SSL_VERIFYPEER => true,
-                    CURLOPT_SSL_VERIFYHOST => 2,
                     CURLOPT_FOLLOWLOCATION => true,
                     CURLOPT_MAXREDIRS => 5,
                     CURLOPT_FILE => $fp
                 ]);
 
+                if (file_exists($this->rootDir('.ignore-ssl'))) {
+                    curl_setopt_array($curl, [
+                        CURLOPT_SSL_VERIFYPEER => false,
+                        CURLOPT_SSL_VERIFYHOST => 0,
+                    ]);
+                } else {
+                    curl_setopt_array($curl, [
+                        CURLOPT_SSL_VERIFYPEER => true,
+                        CURLOPT_SSL_VERIFYHOST => 2,
+                    ]);
+                }
+
                 $this->log->notice('Downloading Winter ZIP via cURL', ['url' => self::WINTER_ARCHIVE]);
                 curl_exec($curl);
                 $responseCode = curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
-                if ($responseCode < 200 || $responseCode > 299) {
+
+                if ($responseCode === 0) {
+                    $this->log->error('Unable to verify SSL certificate or connection to GitHub', []);
+        
+                    curl_close($curl);
+        
+                    throw new SSLValidationException('Unable to verify SSL certificate or connection');
+                } elseif ($responseCode < 200 || $responseCode > 299) {
                     throw new \Exception('Invalid HTTP code received - got ' . $responseCode);
                 }
 
@@ -630,6 +661,7 @@ class Api
         @unlink($this->workDir('winter.zip'));
         @unlink($this->rootDir('install.html'));
         @unlink($this->rootDir('install.zip'));
+        @unlink($this->rootDir('.ignore-ssl'));
 
         // Remove install folders
         $this->log->notice('Removing temporary installation folders');
@@ -969,7 +1001,15 @@ class Api
         $contentType = explode('; ', curl_getinfo($curl, CURLINFO_CONTENT_TYPE))[0];
         $errored = false;
 
-        if ($code < 200 || $code > 299) {
+        if ($code === 0) {
+            $this->log->error('Unable to verify SSL certificate or connection', []);
+            $this->log->debug('Response received from Winter API', ['response' => $response]);
+            $errored = true;
+
+            curl_close($curl);
+
+            throw new SSLValidationException('Unable to verify SSL certificate or connection');
+        } else if ($code < 200 || $code > 299) {
             $this->log->error('HTTP code returned indicates an error', ['code' => $code]);
             $this->log->debug('Response received from Winter API', ['response' => $response]);
             $errored = true;
@@ -1019,11 +1059,21 @@ class Api
         curl_setopt_array($curl, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => 300,
-            CURLOPT_SSL_VERIFYPEER => true,
-            CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
         ]);
+
+        if (file_exists($this->rootDir('.ignore-ssl'))) {
+            curl_setopt_array($curl, [
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_SSL_VERIFYHOST => 0,
+            ]);
+        } else {
+            curl_setopt_array($curl, [
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2,
+            ]);
+        }
 
         if ($method === 'POST') {
             curl_setopt($curl, CURLOPT_URL, self::API_URL . '/' . $uri);

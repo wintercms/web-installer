@@ -11,7 +11,16 @@
         name="API Connection"
         :description="checkDescription('api')"
         :status="checkStatus('api')"
-      />
+      >
+        <template #action v-if="secureError">
+          <Click
+            :label="(disablingSSLChecks) ? 'Ignoring...' : 'Ignore SSL errors'"
+            flag="error"
+            :disabled="disablingSSLChecks"
+            @press="ignoreSSLErrors"
+          />
+        </template>
+      </Check>
 
       <Check
         name="PHP Version"
@@ -79,6 +88,9 @@ export default {
       checksSuccessful: false,
 
       checks: {},
+
+      secureError: false,
+      disablingSSLChecks: false,
     };
   },
   mounted() {
@@ -128,6 +140,9 @@ export default {
 
           if (responses[0].success) {
             this.checks.api.description = 'Your server is able to connect to the Winter CMS Marketplace API.';
+          } else if (responses[0].error === 'Unable to verify SSL certificate or connection') {
+            this.checks.api.description = 'A secure connection could not be established with the Winter CMS Marketplace API.';
+            this.secureError = true;
           } else {
             this.checks.api.description = 'Your server could not connect to the Winter CMS Marketplace API.';
           }
@@ -165,6 +180,8 @@ export default {
       this.ranChecks = false;
       this.completedChecks = false;
       this.checksSuccessful = false;
+      this.secureError = false;
+      this.disablingSSLChecks = false;
 
       this.resetChecks();
       this.runChecks();
@@ -193,6 +210,25 @@ export default {
       this.$store.dispatch('steps/goTo', {
         id: 'license',
       });
+    },
+    ignoreSSLErrors() {
+      this.disablingSSLChecks = true;
+      this.$api('POST', 'ignoreCerts', {}).then(
+        (response) => {
+          if (response.success) {
+            this.rerunChecks();
+          } else {
+            this.disablingSSLChecks = false;
+            this.secureError = false;
+            this.checks.api.description = 'We are unable to disable SSL checks.';
+          }
+        },
+        () => {
+          this.disablingSSLChecks = false;
+          this.secureError = false;
+          this.checks.api.description = 'We are unable to disable SSL checks.';
+        },
+      );
     },
   },
 };

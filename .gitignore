@@ -3,6 +3,7 @@ node_modules
 /dist
 /public/.temp.sqlite
 /public/install.log
+/public/.ignore-ssl
 
 # local env files
 .env.local
