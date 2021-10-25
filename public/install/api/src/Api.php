@@ -110,7 +110,7 @@ class Api
     }
 
     /**
-     * POST /api.php?endpoint=ignoreCets
+     * POST /api.php[endpoint=ignoreCerts]
      *
      * Ignores SSL certificate validation issues for installer.
      *
@@ -273,10 +273,11 @@ class Api
     {
         set_time_limit(360);
 
-        if (!is_dir($this->workDir())) {
-            if (!@mkdir($this->workDir(), 0755, true)) {
-                $this->error('Unable to create a work directory for installation');
-            }
+        if (is_dir($this->workDir())) {
+            $this->rimraf($this->workDir());
+        }
+        if (!@mkdir($this->workDir(), 0755, true)) {
+            $this->error('Unable to create a work directory for installation');
         }
 
         $winterZip = $this->workDir('winter.zip');
