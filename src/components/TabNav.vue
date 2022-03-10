@@ -59,7 +59,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import "~spectre.css/src/tabs";
+@import "spectre.css/src/tabs";
 
 .tab.tab-block {
   display: inline-block;

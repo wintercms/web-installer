@@ -87,9 +87,9 @@ $control-size-lg: $unit-16 !default;
 $control-padding-x: $unit-4 !default;
 $control-padding-x-sm: $unit-4 * .75 !default;
 $control-padding-x-lg: $unit-4 * 1.5 !default;
-$control-padding-y: ($control-size - $line-height) / 2 - $border-width !default;
-$control-padding-y-sm: ($control-size-sm - $line-height) / 2 - $border-width !default;
-$control-padding-y-lg: ($control-size-lg - $line-height) / 2 - $border-width !default;
+$control-padding-y: calc(($control-size - $line-height) / 2) - $border-width !default;
+$control-padding-y-sm: calc(($control-size-sm - $line-height) / 2) - $border-width !default;
+$control-padding-y-lg: calc(($control-size-lg - $line-height) / 2) - $border-width !default;
 $control-icon-size: .8rem !default;
 
 $control-width-xs: 180px !default;

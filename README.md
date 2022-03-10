@@ -53,7 +53,7 @@ composer --working-dir=./public/install/api install
 The included dependencies include a simple web-server which performs hot-reloading of the app when changes are made. To start this server, run the following:
 
 ```
-npm run serve
+npm run dev
 ```
 
 You will be given a URL in which you can review the application in your browser.
@@ -61,7 +61,7 @@ You will be given a URL in which you can review the application in your browser.
 When developing in this format, you will need to provide a URL in order to access the PHP API file located in `public/install/api.php`. You will need to create a file called `.env.local` inside the root folder of your development copy, and add the following line:
 
 ```
-VUE_APP_INSTALL_URL="<path>"
+VITE_APP_INSTALL_URL="<path>"
 ```
 
 Substituting `<path>` with the URL to the `public/install` directory as it would be located on your web server. You can run the in-built PHP server to serve this, by navigating to this folder and running the following command:
@@ -73,7 +73,7 @@ php -S 127.0.0.1:8081
 In following the above, the `.env.local` file should contain the following:
 
 ```
-VUE_APP_INSTALL_URL="http://127.0.0.1:8081"
+VITE_APP_INSTALL_URL="http://127.0.0.1:8081"
 ```
 
 ### Building the application

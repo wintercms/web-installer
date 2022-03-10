@@ -123,8 +123,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "~spectre.css/src/mixins/button";
-@import "~spectre.css/src/mixins/shadow";
+@import "spectre.css/src/mixins/button";
+@import "spectre.css/src/mixins/shadow";
 
 button {
   appearance: none;

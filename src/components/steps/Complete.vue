@@ -59,7 +59,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "~spectre.css/src/mixins/shadow";
+@import "spectre.css/src/mixins/shadow";
 
 .step-content {
   display: flex;
