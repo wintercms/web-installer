@@ -96,7 +96,7 @@ export default {
   methods: {
     async install() {
       this.begun = true;
-      this.installation.installing = true;
+      this.$emit('installing');
 
       // Disable ESLint rule checks for these lines, as the AirBnb standard doesn't seem to handle
       // async work very well.

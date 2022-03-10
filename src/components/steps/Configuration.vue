@@ -16,7 +16,9 @@
                   slim
                 >
                   <div class="form-group" :class="{ 'has-error': dirty && invalid }">
-                    <label class="form-label label-lg label-required" for="siteName">Site name</label>
+                    <label class="form-label label-lg label-required" for="siteName">
+                      Site name
+                    </label>
                     <small class="help">
                       Enter the name of your next awesome project.
                     </small>
@@ -137,7 +139,9 @@
                   slim
                 >
                   <div class="form-group" :class="{ 'has-error': dirty && invalid }">
-                    <label class="form-label label-required" for="databaseHost">Server Hostname</label>
+                    <label class="form-label label-required" for="databaseHost">
+                      Server Hostname
+                    </label>
                     <input
                       type="text"
                       class="form-input"
@@ -177,7 +181,9 @@
                   slim
                 >
                   <div class="form-group" :class="{ 'has-error': dirty && invalid }">
-                    <label class="form-label label-required" for="databaseName">Database Name</label>
+                    <label class="form-label label-required" for="databaseName">
+                      Database Name
+                    </label>
                     <input
                       type="text"
                       class="form-input"

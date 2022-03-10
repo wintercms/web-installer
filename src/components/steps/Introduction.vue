@@ -6,7 +6,8 @@
       <h3>Welcome to the Winter CMS Installer.</h3>
 
       <p>
-        Thanks for choosing Winter CMS as your development platform, get ready to enjoy development again!
+        Thanks for choosing Winter CMS as your development platform, get ready to enjoy development
+        again!
       </p>
       <p>
         This installer will guide you through the process of installing a fresh copy of Winter CMS

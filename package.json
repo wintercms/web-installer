@@ -7,7 +7,8 @@
     "build": "npm run dellog && npm run delbuild && vite build",
     "preview": "vite preview",
     "dellog": "npx rimraf ./public/install.log",
-    "delbuild": "npx rimraf ./dist"
+    "delbuild": "npx rimraf ./dist",
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore src"
   },
   "dependencies": {
     "vue": "^2.6.14",
@@ -17,10 +18,12 @@
   },
   "devDependencies": {
     "eslint": "^8.10.0",
+    "eslint-import-resolver-alias": "^1.1.2",
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-vue": "^8.5.0",
     "vite-plugin-vue2": "^1.9.3",
     "vite": "^2.8.0",
+    "@vue/eslint-config-airbnb": "^6.0.0",
     "sass": "^1.49.9",
     "sass-loader": "^12.6.0"
   }

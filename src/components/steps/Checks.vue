@@ -136,7 +136,7 @@ export default {
           this.checks.phpVersion.status = responses[1].success;
           this.checks.phpExtensions.status = responses[2].success;
 
-          this.installation.installPath = responses[1].data.installPath || null;
+          this.$emit('installPath', responses[1].data.installPath || null);
 
           if (responses[0].success) {
             this.checks.api.description = 'Your server is able to connect to the Winter CMS Marketplace API.';

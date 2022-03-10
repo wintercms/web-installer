@@ -2,7 +2,6 @@
   <button
     :type="type"
     :class="buttonClasses"
-    role="button"
     :aria-pressed="pressed"
     :aria-label="label"
     :disabled="disabled"

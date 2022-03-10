@@ -25,8 +25,17 @@ module.exports = {
     'vue/no-parsing-error': ['error', {
       'invalid-first-character-of-tag-name': false,
     }],
+    'vue/multi-word-component-names': 'off',
+    'vuejs-accessibility/label-has-for': 'off',
+    'vuejs-accessibility/tabindex-no-positive': 'off',
   },
-  parserOptions: {
-    parser: 'babel-eslint',
+  settings: {
+    'import/resolver': {
+      alias: {
+        map: [
+          ['@', './src'],
+        ],
+      },
+    },
   },
 };

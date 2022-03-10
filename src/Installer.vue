@@ -13,6 +13,7 @@
             v-show="isStepActive('checks')"
             :key="'checks'"
             :installation="installation"
+            @installPath="setInstallPath"
           />
           <License
             v-show="isStepActive('license')"
@@ -34,6 +35,7 @@
             :key="'installation'"
             :site="site"
             :installation="installation"
+            @installing="installation.installing = true"
           />
           <Complete
             v-show="isStepActive('complete')"
@@ -125,6 +127,9 @@ export default {
         + '//'
         + window.location.host
         + (window.location.pathname.replace('/install.html', ''));
+    },
+    setInstallPath(path) {
+      this.installation.installPath = path;
     },
   },
 };
