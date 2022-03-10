@@ -34,6 +34,9 @@ class Api
     // Minimum PHP version required for Winter CMS
     const MIN_PHP_VERSION = '7.2.9';
 
+    // Minimum PHP version that is unsupported for Winter CMS (upper limit)
+    const MAX_PHP_VERSION = '8.1.0';
+
     // Winter CMS API URL
     const API_URL = 'https://api.wintercms.com/marketplace';
 
@@ -131,7 +134,10 @@ class Api
      */
     public function getCheckPhpVersion()
     {
-        $hasVersion = version_compare(trim(strtolower(PHP_VERSION)), self::MIN_PHP_VERSION, '>=');
+        $hasVersion = (
+            version_compare(trim(strtolower(PHP_VERSION)), self::MIN_PHP_VERSION, '>=')
+            && version_compare(trim(strtolower(PHP_VERSION)), self::MAX_PHP_VERSION, '<')
+        );
 
         $this->data = [
             'detected' => PHP_VERSION,

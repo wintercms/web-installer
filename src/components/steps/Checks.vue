@@ -194,7 +194,7 @@ export default {
         },
         phpVersion: {
           status: null,
-          description: 'Check that your server is running at least PHP version 7.2.9.',
+          description: 'Check that your server is running a compatible PHP version (PHP 7.2 to 8.0 supported).',
         },
         phpExtensions: {
           status: null,
