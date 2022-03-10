@@ -13,6 +13,11 @@
             "Winter\\Installer\\": "src"
         }
     },
+    "config": {
+        "platform": {
+            "php": "7.2.9"
+        }
+    },
     "license": "MIT",
     "minimum-stability": "dev",
     "prefer-stable": true
