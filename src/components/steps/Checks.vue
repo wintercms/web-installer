@@ -99,6 +99,7 @@ export default {
   watch: {
     isActive(val) {
       if (val && !this.ranChecks) {
+        this.resetChecks();
         this.runChecks();
       }
     },
@@ -124,7 +125,7 @@ export default {
 
       Promise.all([
         this.$api('GET', 'checkApi'),
-        this.$api('GET', 'checkPhpVersion'),
+        this.$api('GET', 'checkPhpVersion', [`beta=${(this.installation.beta) ? 1 : 0}`]),
         this.$api('GET', 'checkPhpExtensions'),
       ]).then(
         (responses) => {
@@ -194,7 +195,9 @@ export default {
         },
         phpVersion: {
           status: null,
-          description: 'Check that your server is running a compatible PHP version (PHP 7.2 to 8.0 supported).',
+          description: (this.installation.beta)
+            ? 'Check that your server is running a compatible PHP version (PHP 8.0 to 8.1 supported).'
+            : 'Check that your server is running a compatible PHP version (PHP 7.2 to 8.0 supported).',
         },
         phpExtensions: {
           status: null,

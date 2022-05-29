@@ -37,14 +37,26 @@ class Api
     // Minimum PHP version that is unsupported for Winter CMS (upper limit)
     const MAX_PHP_VERSION = '8.1.0';
 
+    // Minimum PHP version required for Winter CMS Beta
+    const MIN_PHP_VERSION_BETA = '8.0.2';
+
+    // Minimum PHP version that is unsupported for Winter CMS Beta (upper limit)
+    const MAX_PHP_VERSION_BETA = '8.2.0';
+
     // Winter CMS API URL
     const API_URL = 'https://api.wintercms.com/marketplace';
 
     // Winter CMS codebase archive
     const WINTER_ARCHIVE = 'https://github.com/wintercms/winter/archive/refs/heads/1.1.zip';
 
+    // Winter CMS Beta codebase archive
+    const WINTER_ARCHIVE_BETA = 'https://github.com/wintercms/winter/archive/refs/heads/wip/1.2.zip';
+
     // Archive subfolder
     const ARCHIVE_SUBFOLDER = 'winter-1.1/';
+
+    // Winter CMS Beta codebase archive
+    const ARCHIVE_SUBFOLDER_BETA = 'winter-wip-1.2/';
 
     /** @var Logger */
     protected $logger;
@@ -134,20 +146,27 @@ class Api
      */
     public function getCheckPhpVersion()
     {
-        $hasVersion = (
-            version_compare(trim(strtolower(PHP_VERSION)), self::MIN_PHP_VERSION, '>=')
-            && version_compare(trim(strtolower(PHP_VERSION)), self::MAX_PHP_VERSION, '<')
-        );
+        if ($this->data['beta']) {
+            $hasVersion = (
+                version_compare(trim(strtolower(PHP_VERSION)), self::MIN_PHP_VERSION, '>=')
+                && version_compare(trim(strtolower(PHP_VERSION)), self::MAX_PHP_VERSION, '<')
+            );
+        } else {
+            $hasVersion = (
+                version_compare(trim(strtolower(PHP_VERSION)), self::MIN_PHP_VERSION_BETA, '>=')
+                && version_compare(trim(strtolower(PHP_VERSION)), self::MAX_PHP_VERSION_BETA, '<')
+            );
+        }
 
         $this->data = [
             'detected' => PHP_VERSION,
-            'needed' => self::MIN_PHP_VERSION,
+            'needed' => ($this->data['beta']) ? self::MIN_PHP_VERSION_BETA : self::MIN_PHP_VERSION,
             'installPath' => $this->rootDir(),
         ];
 
         $this->log->notice('Compared PHP version', [
             'installed' => PHP_VERSION,
-            'needed' => self::MIN_PHP_VERSION
+            'needed' => ($this->data['beta']) ? self::MIN_PHP_VERSION_BETA : self::MIN_PHP_VERSION
         ]);
 
         if (!$hasVersion) {
@@ -303,7 +322,7 @@ class Api
                 $params['client'] = 'winter-installer';
 
                 curl_setopt_array($curl, [
-                    CURLOPT_URL => self::WINTER_ARCHIVE,
+                    CURLOPT_URL => ($this->data['beta']) ? self::WINTER_ARCHIVE_BETA : self::WINTER_ARCHIVE,
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_TIMEOUT => 300,
                     CURLOPT_FOLLOWLOCATION => true,
@@ -382,18 +401,20 @@ class Api
 
         $zip->extractTo($this->workDir());
 
-        if (!empty(self::ARCHIVE_SUBFOLDER)) {
+        $archiveSubdir = ($this->data['beta']) ? self::ARCHIVE_SUBFOLDER_BETA : self::ARCHIVE_SUBFOLDER;
+
+        if (!empty($archiveSubdir)) {
             $this->log->notice('Move subfoldered files into position', ['subfolder' => self::ARCHIVE_SUBFOLDER]);
 
             // Move files from subdirectory into install folder
-            $dir = new DirectoryIterator($this->workDir(self::ARCHIVE_SUBFOLDER));
+            $dir = new DirectoryIterator($this->workDir($archiveSubdir));
 
             foreach ($dir as $item) {
                 if ($item->isDot()) {
                     continue;
                 }
 
-                $relativePath = str_replace($this->workDir(self::ARCHIVE_SUBFOLDER), '', $item->getPathname());
+                $relativePath = str_replace($this->workDir($archiveSubdir), '', $item->getPathname());
 
                 rename($item->getPathname(), $this->workDir($relativePath));
             }
@@ -401,9 +422,9 @@ class Api
 
         // Clean up
         $zip->close();
-        if (!empty(self::ARCHIVE_SUBFOLDER)) {
-            $this->log->notice('Remove ZIP subfolder', ['subfolder' => self::ARCHIVE_SUBFOLDER]);
-            rmdir($this->workDir(self::ARCHIVE_SUBFOLDER));
+        if (!empty($archiveSubdir)) {
+            $this->log->notice('Remove ZIP subfolder', ['subfolder' => $archiveSubdir]);
+            rmdir($this->workDir($archiveSubdir));
         }
 
         // Make artisan command-line tool executable

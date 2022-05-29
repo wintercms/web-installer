@@ -117,7 +117,7 @@ export default {
     },
     installStep(endpoint) {
       return new Promise((resolve, reject) => {
-        this.$api('POST', endpoint, { site: this.site }).then(
+        this.$api('POST', endpoint, { site: this.site, beta: (this.installation.beta) ? 1 : 0 }).then(
           (response) => {
             if (response.success) {
               resolve();

@@ -8,6 +8,7 @@
           <Introduction
             v-show="isStepActive('intro')"
             :key="'intro'"
+            :installation="installation"
           />
           <Checks
             v-show="isStepActive('checks')"
@@ -75,6 +76,7 @@ export default {
       installation: {
         installing: false,
         installPath: null,
+        beta: false,
       },
       site: {
         name: '',

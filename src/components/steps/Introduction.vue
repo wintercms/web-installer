@@ -14,6 +14,22 @@
         for your project. Please follow the instructions provided and fill in all necessary
         information.
       </p>
+
+      <div class="beta-optin">
+        <input
+          id="beta"
+          name="beta"
+          type="checkbox"
+          v-model="installation.beta"
+        >
+        <label for="beta">
+          <strong>Install Winter CMS 1.2 beta</strong>
+          <span>By ticking this, you will install the Winter CMS 1.2 beta, built on top of
+            Laravel 9. This version is still in beta. Leave this unticked to receive the stable
+            version of Winter CMS.
+          </span>
+        </label>
+      </div>
     </div>
 
     <div class="step-actions">
@@ -32,6 +48,12 @@ import Click from '@/components/Click.vue';
 
 export default {
   name: 'Introduction',
+  props: {
+    installation: {
+      type: Object,
+      required: true,
+    },
+  },
   mixins: [
     StepMixin,
   ],

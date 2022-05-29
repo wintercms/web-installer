@@ -1,3 +1,24 @@
 .columns + .columns {
   margin-top: $layout-spacing-sm;
 }
+
+.beta-optin {
+  margin-top: $layout-spacing;
+  background: $gray-color-light;
+  border: 1px solid $gray-color;
+  padding: $layout-spacing-sm;
+  display: flex;
+  flex-direction: row;
+  gap: $layout-spacing-sm;
+  align-items: flex-start;
+  text-align: left;
+
+  input {
+    margin-top: 4px;
+  }
+
+  strong, span {
+    display: block;
+    font-size: $font-size-sm;
+  }
+}
