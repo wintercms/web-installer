@@ -12,6 +12,7 @@ use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Winter\Installer\Exception\SSLValidationException;
+use Winter\Storm\Parse\EnvFile;
 
 /**
  * API Class
@@ -32,19 +33,19 @@ use Winter\Installer\Exception\SSLValidationException;
 class Api
 {
     // Minimum PHP version required for Winter CMS
-    const MIN_PHP_VERSION = '7.2.9';
+    const MIN_PHP_VERSION = '8.0.2';
 
     // Minimum PHP version that is unsupported for Winter CMS (upper limit)
-    const MAX_PHP_VERSION = '8.1.0';
+    const MAX_PHP_VERSION = '8.999.999';
 
     // Winter CMS API URL
     const API_URL = 'https://api.wintercms.com/marketplace';
 
     // Winter CMS codebase archive
-    const WINTER_ARCHIVE = 'https://github.com/wintercms/winter/archive/refs/heads/1.1.zip';
+    const WINTER_ARCHIVE = 'https://github.com/wintercms/winter/archive/refs/heads/1.2.zip';
 
     // Archive subfolder
-    const ARCHIVE_SUBFOLDER = 'winter-1.1/';
+    const ARCHIVE_SUBFOLDER = 'winter-1.2/';
 
     /** @var Logger */
     protected $logger;
@@ -128,7 +129,7 @@ class Api
     /**
      * GET /api.php?endpoint=checkPhpVersion
      *
-     * Checks that the currently-running version of PHP matches the minimum required for Winter CMS (1.1 branch)
+     * Checks that the currently-running version of PHP matches the minimum required for Winter CMS (1.2 branch)
      *
      * @return void
      */
@@ -271,7 +272,7 @@ class Api
     /**
      * POST /api.php[endpoint=downloadWinter]
      *
-     * Downloads the Winter CMS codebase from the 1.1 branch.
+     * Downloads the Winter CMS codebase from the 1.2 branch.
      *
      * @return void
      */
@@ -534,40 +535,9 @@ class Api
         $this->bootFramework();
 
         try {
-            $this->rewriter = new ConfigRewriter;
+            $envFile = EnvFile::open(base_path('.env.default'));
+            print_r($envFile->getVariables());
 
-            // config/app.php
-            $this->log->notice('Rewriting config', ['path' => $this->workDir('config/app.php')]);
-            $this->rewriter->toFile($this->workDir('config/app.php'), [
-                'name' => $this->data['site']['name'],
-                'url' => $this->data['site']['url'],
-                'key' => $this->generateKey(),
-            ]);
-
-            // config/cms.php
-            $this->log->notice('Rewriting config', ['path' => $this->workDir('config/cms.php')]);
-            $this->rewriter->toFile($this->workDir('config/cms.php'), [
-                'backendUri' => '/' . $this->data['site']['backendUrl'],
-            ]);
-
-            // config/database.php
-            $dbConfig = $this->data['site']['database'];
-
-            $this->log->notice('Rewriting config', ['path' => $this->workDir('config/database.php')]);
-            if ($dbConfig['type'] === 'sqlite') {
-                $this->rewriter->toFile($this->workDir('config/database.php'), [
-                    'default' => 'sqlite',
-                ]);
-            } else {
-                $this->rewriter->toFile($this->workDir('config/database.php'), [
-                    'default' => $dbConfig['type'],
-                    'connections.' . $dbConfig['type'] . '.host' => $dbConfig['host'] ?? null,
-                    'connections.' . $dbConfig['type'] . '.port' => $dbConfig['port'] ?? $this->getDefaultDbPort($dbConfig['type']),
-                    'connections.' . $dbConfig['type'] . '.database' => $dbConfig['name'],
-                    'connections.' . $dbConfig['type'] . '.username' => $dbConfig['user'] ?? '',
-                    'connections.' . $dbConfig['type'] . '.password' => $dbConfig['pass'] ?? ''
-                ]);
-            }
         } catch (\Throwable $e) {
             $this->error('Unable to write config. ' . $e->getMessage());
         }
@@ -678,14 +648,11 @@ class Api
         // Remove core development files
         $this->log->notice('Removing core development files');
         $this->rimraf($this->workDir('.github'));
-        $this->rimraf($this->workDir('tests/fixtures'));
-        $this->rimraf($this->workDir('tests/js'));
-        $this->rimraf($this->workDir('tests/unit'));
-        @unlink($this->workDir('.gitconfig'));
+        $this->rimraf($this->workDir('.gitpod'));
         @unlink($this->workDir('.gitattributes'));
+        @unlink($this->workDir('.gitpod.yml'));
         @unlink($this->workDir('.jshintrc'));
         @unlink($this->workDir('.babelrc'));
-        @unlink($this->workDir('package.json'));
         @unlink($this->workDir('CHANGELOG.md'));
         @unlink($this->workDir('phpunit.xml'));
         @unlink($this->workDir('phpcs.xml'));
