@@ -2,6 +2,8 @@
 
 namespace Winter\Installer;
 
+use Exception;
+
 /**
  * Configuration rewriter
  *
