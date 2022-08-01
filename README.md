@@ -13,14 +13,14 @@ For developers, we recommend the following methods:
 
 ## Installation
 
+> **NOTE:** This installer installs Winter CMS 1.2, which requires PHP 8.0 or above. If you are still running PHP 7.4 or below, please use [v1.0.2](https://github.com/wintercms/web-installer/releases/download/v1.0.2/install.zip) of this installer, which installs Winter 1.1. Do note that this branch of Winter is now end-of-life and will only be receiving security fixes.
+
 1. Prepare an empty directory on the web server that will host your Winter CMS installation. It can be a main domain, sub-domain or subfolder.
 2. [Download the "install.zip" file](https://github.com/wintercms/web-installer/releases/latest) from the latest release of the Winter CMS Web Installer into this folder.
 3. Unzip the downloaded ZIP file.
 4. Grant write permissions to all files and folders that were extracted.
 5. In your web browser, navigate to the URL pointing to that folder, and include `/install.html` at the end of the URL.
 6. Follow the instructions given in the installer.
-
-> **Note:** The web installer will install a production version of Winter CMS that does not contain files necessary for development of Winter CMS itself, like unit tests or Composer files. Should you require these, please use one of the other installation methods.
 
 ## Links
 
@@ -31,9 +31,9 @@ For further information and requirements for Winter CMS, [consult the documentat
 The Web installer is built on [VueJS](https://vuejs.org) and uses a primarily NodeJS-driven development pipeline, but does
 contain a PHP API element to run checks on the system and perform the installation of Winter CMS. You will need the following:
 
-- `node` v13 or above.
-- `npm` v5 or above.
-- `php` v7.2.9 or above.
+- `node` v14 or above.
+- `npm` v6 or above.
+- `php` v8.0 or above
 
 To install all necessary dependencies, run the following:
 
