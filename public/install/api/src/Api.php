@@ -12,7 +12,7 @@ use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Winter\Installer\Exception\SSLValidationException;
-use Winter\Storm\Parse\EnvFile;
+use Winter\LaravelConfig\ArrayFile;
 
 /**
  * API Class
@@ -535,9 +535,47 @@ class Api
         $this->bootFramework();
 
         try {
-            $envFile = EnvFile::open(base_path('.env.default'));
-            print_r($envFile->getVariables());
+            $this->log->notice('Rewriting config', ['path' => $this->workDir('config/app.php')]);
+            $config = ArrayFile::open($this->workDir('config/app.php'), true);
 
+            $config
+                ->set([
+                    'name' => $this->data['site']['name'],
+                    'url' => $this->data['site']['url'],
+                    'key' => $this->generateKey(),
+                ])
+                ->write();
+
+            $this->log->notice('Rewriting config', ['path' => $this->workDir('config/cms.php')]);
+            $config = ArrayFile::open($this->workDir('config/cms.php'), true);
+
+            $config
+                ->set([
+                    'backendUri' => '/' . $this->data['site']['backendUrl'],
+                ])
+                ->write();
+
+            // config/database.php
+            $dbConfig = $this->data['site']['database'];
+
+            $this->log->notice('Rewriting config', ['path' => $this->workDir('config/database.php')]);
+            $config = ArrayFile::open($this->workDir('config/database.php'), true);
+
+            if ($dbConfig['type'] === 'sqlite') {
+                $config->set([
+                    'default' => 'sqlite',
+                ]);
+            } else {
+                $config->set([
+                    'default' => $dbConfig['type'],
+                    'connections.' . $dbConfig['type'] . '.host' => $dbConfig['host'] ?? null,
+                    'connections.' . $dbConfig['type'] . '.port' => $dbConfig['port'] ?? $this->getDefaultDbPort($dbConfig['type']),
+                    'connections.' . $dbConfig['type'] . '.database' => $dbConfig['name'],
+                    'connections.' . $dbConfig['type'] . '.username' => $dbConfig['user'] ?? '',
+                    'connections.' . $dbConfig['type'] . '.password' => $dbConfig['pass'] ?? ''
+                ]);
+            }
+            $config->write();
         } catch (\Throwable $e) {
             $this->error('Unable to write config. ' . $e->getMessage());
         }
