@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ba4f4d7a9797c45696211be7a6e8bcae",
+    "content-hash": "f8dec0f106a027cc4ee3c2fab5e7353c",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -3280,16 +3280,16 @@
         },
         {
             "name": "winter/laravel-config-writer",
-            "version": "v1.0.0",
+            "version": "v1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wintercms/laravel-config-writer.git",
-                "reference": "aa97a98863bdba445b601263b442afc76ebdc5aa"
+                "reference": "b1e1a0781b8756ad225ae715e6a8b7df22e75246"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wintercms/laravel-config-writer/zipball/aa97a98863bdba445b601263b442afc76ebdc5aa",
-                "reference": "aa97a98863bdba445b601263b442afc76ebdc5aa",
+                "url": "https://api.github.com/repos/wintercms/laravel-config-writer/zipball/b1e1a0781b8756ad225ae715e6a8b7df22e75246",
+                "reference": "b1e1a0781b8756ad225ae715e6a8b7df22e75246",
                 "shasum": ""
             },
             "require": {
@@ -3303,7 +3303,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "Winter\\LaravelConfig\\": "src/"
+                    "Winter\\LaravelConfigWriter\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -3325,7 +3325,7 @@
             "description": "Utility to create and update Laravel config and .env files",
             "support": {
                 "issues": "https://github.com/wintercms/laravel-config-writer/issues",
-                "source": "https://github.com/wintercms/laravel-config-writer/tree/v1.0.0"
+                "source": "https://github.com/wintercms/laravel-config-writer/tree/v1.0.1"
             },
             "funding": [
                 {
@@ -3337,7 +3337,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2022-08-01T07:21:19+00:00"
+            "time": "2022-08-01T14:24:20+00:00"
         },
         {
             "name": "winter/packager",

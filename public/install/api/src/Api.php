@@ -12,7 +12,7 @@ use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Winter\Installer\Exception\SSLValidationException;
-use Winter\LaravelConfig\ArrayFile;
+use Winter\LaravelConfigWriter\ArrayFile;
 
 /**
  * API Class
