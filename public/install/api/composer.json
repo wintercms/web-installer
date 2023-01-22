@@ -3,7 +3,7 @@
     "description": "Web-based installer for Winter CMS",
     "type": "project",
     "require": {
-        "winter/packager": "^0.1.5",
+        "winter/packager": "^0.2.2",
         "winter/laravel-config-writer": "^1.0.1",
         "doctrine/dbal": "^3.1.4",
         "illuminate/database": "^9.20.0",
