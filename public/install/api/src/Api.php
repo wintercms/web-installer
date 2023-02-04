@@ -48,7 +48,7 @@ class Api
     const ARCHIVE_SUBFOLDER = 'winter-1.2/';
 
     /** @var Logger */
-    protected $logger;
+    protected $log;
 
     /** @var string Requested endpoint */
     protected $endpoint;
