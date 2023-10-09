@@ -8,7 +8,7 @@ A web-based installation script that will install a fresh copy of Winter CMS. Th
 
 For developers, we recommend the following methods:
 
-- [Composer installation](https://wintercms.com/docs/console/commands#console-install-composer)
+- [Composer installation](https://wintercms.com/docs/v1.2/docs/architecture/using-composer#installing-winter-via-composer)
 - [Command-line installation](https://github.com/wintercms/cli)
 
 ## Installation
