@@ -584,7 +584,7 @@ class Api
         $opcacheEnabled = ini_get('opcache.enable');
         $opcachePath = trim(ini_get('opcache.restrict_api'));
 
-        if (!empty($opcachePath) && !starts_with(__FILE__, $opcachePath)) {
+        if (!empty($opcachePath) && !str_starts_with(__FILE__, $opcachePath)) {
             $opcacheEnabled = false;
         }
 
