@@ -673,10 +673,10 @@ class Api
 
         // Remove install files
         $this->log->notice('Removing installation files');
-        @unlink($this->workDir('winter.zip'));
-        @unlink($this->rootDir('install.html'));
-        @unlink($this->rootDir('install.zip'));
-        @unlink($this->rootDir('.ignore-ssl'));
+        $this->rimraf($this->workDir('winter.zip'));
+        $this->rimraf($this->rootDir('install.html'));
+        $this->rimraf($this->rootDir('install.zip'));
+        $this->rimraf($this->rootDir('.ignore-ssl'));
 
         // Remove install folders
         $this->log->notice('Removing temporary installation folders');
@@ -687,13 +687,13 @@ class Api
         $this->log->notice('Removing core development files');
         $this->rimraf($this->workDir('.github'));
         $this->rimraf($this->workDir('.gitpod'));
-        @unlink($this->workDir('.gitattributes'));
-        @unlink($this->workDir('.gitpod.yml'));
-        @unlink($this->workDir('.jshintrc'));
-        @unlink($this->workDir('.babelrc'));
-        @unlink($this->workDir('CHANGELOG.md'));
-        @unlink($this->workDir('phpunit.xml'));
-        @unlink($this->workDir('phpcs.xml'));
+        $this->rimraf($this->workDir('.gitattributes'));
+        $this->rimraf($this->workDir('.gitpod.yml'));
+        $this->rimraf($this->workDir('.jshintrc'));
+        $this->rimraf($this->workDir('.babelrc'));
+        $this->rimraf($this->workDir('CHANGELOG.md'));
+        $this->rimraf($this->workDir('phpunit.xml'));
+        $this->rimraf($this->workDir('phpcs.xml'));
 
         // Move files from subdirectory into install folder
         $this->log->notice('Moving files from temporary work directory to final installation path', [
@@ -1117,13 +1117,22 @@ class Api
 
     /**
      * PHP-based "rm -rf" command.
-     * 
+     *
      * Recursively removes a directory and all files and subdirectories within.
-     * 
+     *
      * @return void
      */
     protected function rimraf(string $path)
     {
+        if (!file_exists($path)) {
+            return;
+        }
+
+        if (is_file($path)) {
+            @unlink($path);
+            return;
+        }
+
         $dir = new DirectoryIterator($path);
 
         foreach ($dir as $item) {
