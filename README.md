@@ -16,7 +16,7 @@ For developers, we recommend the following methods:
 > **NOTE:** This installer installs Winter CMS 1.2, which requires PHP 8.0 or above. If you are still running PHP 7.4 or below, please use [v1.0.2](https://github.com/wintercms/web-installer/releases/download/v1.0.2/install.zip) of this installer, which installs Winter 1.1. Do note that this branch of Winter is now end-of-life and will only be receiving security fixes.
 
 1. Prepare an empty directory on the web server that will host your Winter CMS installation. It can be a main domain, sub-domain or subfolder.
-2. [Download the latest "install.zip" file]([https://github.com/wintercms/web-installer/releases/latest](https://github.com/wintercms/web-installer/releases/latest/download/install.zip)) into this folder.
+2. [Download the latest "install.zip" file](https://github.com/wintercms/web-installer/releases/latest/download/install.zip) into this folder.
 3. Unzip the downloaded ZIP file.
 4. Grant write permissions to all files and folders that were extracted.
 5. In your web browser, navigate to the URL pointing to that folder, and include `/install.html` at the end of the URL.
