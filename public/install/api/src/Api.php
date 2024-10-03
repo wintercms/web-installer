@@ -685,6 +685,7 @@ class Api
 
         // Remove core development files
         $this->log->notice('Removing core development files');
+        $this->rimraf($this->workDir('.devcontainer'));
         $this->rimraf($this->workDir('.github'));
         $this->rimraf($this->workDir('.gitpod'));
         $this->rimraf($this->workDir('.gitattributes'));
